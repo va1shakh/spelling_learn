@@ -15,6 +15,7 @@
       rel="stylesheet"
     />
     <style>
+      /* Font settings */
       body {
         font-family: "Space Mono", monospace;
       }
@@ -137,7 +138,7 @@
         error: false,
         success: false,
         started: false,
-        // Default word list (text‑only version)
+        // Default word list (fallback)
         words: [
           "Elephant",
           "Banana",
@@ -147,21 +148,8 @@
           "hello",
           "hi",
           "goodbye"
-        ],
-        showMenu: false
+        ]
       };
-
-      // If custom words are stored in localStorage, load them
-      if (localStorage.getItem("customWords")) {
-        try {
-          const customWords = JSON.parse(localStorage.getItem("customWords"));
-          if (Array.isArray(customWords) && customWords.length > 0) {
-            state.words = customWords;
-          }
-        } catch (e) {
-          console.error("Error parsing customWords from localStorage:", e);
-        }
-      }
 
       // safeRender: Preserves caret position if autoFocus is true.
       function safeRender(autoFocus = false) {
@@ -185,32 +173,15 @@
         const app = document.getElementById("app");
         let content = "";
 
-        // Menu button
-        content += `
-          <button id="menuBtn" class="absolute top-5 left-5 bg-white bg-opacity-20 p-3 rounded-full shadow-lg hover:bg-opacity-30 transition">
-            ${menuIconSVG()}
-          </button>
-        `;
-
-        // Menu panel with file input for custom word list
-        if (state.showMenu) {
-          content += `
-            <div id="menuPanel" class="absolute top-16 left-5 p-4 bg-black bg-opacity-70 rounded-lg text-white shadow-lg">
-              <label class="block text-sm mb-1">Upload Word List:</label>
-              <input id="wordFileInput" type="file" accept=".txt" class="text-sm bg-gray-800 p-2 rounded">
-            </div>
-          `;
-        }
-
         if (!state.started) {
           // Start screen
           content += `
-            <div id="startScreen" class="text-center z-10 animate-fadeInScale">\n
-              <h1 class="text-5xl font-extrabold mb-8">Spelling Learning</h1>\n
-              <button id="startBtn" class="bg-gradient-to-r from-purple-500 to-indigo-500 px-8 py-4 rounded-full text-lg shadow-lg hover:from-purple-600 hover:to-indigo-600 transition">\n
-                Start\n
-              </button>\n
-            </div>\n
+            <div id="startScreen" class="text-center z-10 animate-fadeInScale">
+              <h1 class="text-5xl font-extrabold mb-8">Spelling Learning</h1>
+              <button id="startBtn" class="bg-gradient-to-r from-purple-500 to-indigo-500 px-8 py-4 rounded-full text-lg shadow-lg hover:from-purple-600 hover:to-indigo-600 transition">
+                Start
+              </button>
+            </div>
           `;
         } else if (state.step < state.words.length) {
           // Determine border color based on state
@@ -225,13 +196,13 @@
 
           // Main card: display current word, progress bar, and input field
           content += `
-            <div id="card" class="w-96 p-6 rounded-xl neumorphic-card text-center z-10 mb-4">\n
-              <div class="progress-container mb-4">\n
-                <div class="progress-bar" style="width: ${progressPercent}%;"></div>\n
-              </div>\n
-              <h2 class="word text-3xl font-semibold mb-4">${state.words[state.step]}</h2>\n
-              <input id="textInput" class="w-full p-4 text-lg rounded-md border-2 transition-colors duration-300 glossy-input ${inputBorderClass}" value="${state.input}" placeholder="Type here...">\n
-            </div>\n
+            <div id="card" class="w-96 p-6 rounded-xl neumorphic-card text-center z-10 mb-4">
+              <div class="progress-container mb-4">
+                <div class="progress-bar" style="width: ${progressPercent}%;"></div>
+              </div>
+              <h2 class="word text-3xl font-semibold mb-4">${state.words[state.step]}</h2>
+              <input id="textInput" class="w-full p-4 text-lg rounded-md border-2 transition-colors duration-300 glossy-input ${inputBorderClass}" value="${state.input}" placeholder="Type here...">
+            </div>
           `;
         } else {
           // End screen
@@ -248,45 +219,6 @@
 
       // Attach event listeners
       function attachListeners() {
-        // Toggle menu button
-        const menuBtn = document.getElementById("menuBtn");
-        if (menuBtn) {
-          menuBtn.addEventListener("click", () => {
-            state.showMenu = !state.showMenu;
-            renderApp(); // Re-render without autoFocus on menu toggle
-          });
-        }
-
-        // File input for custom word list
-        const fileInput = document.getElementById("wordFileInput");
-        if (fileInput) {
-          fileInput.addEventListener("change", (e) => {
-            const file = e.target.files[0];
-            if (file) {
-              const reader = new FileReader();
-              reader.onload = function (e) {
-                const text = e.target.result;
-                const words = text
-                  .split(/\r?\n/)
-                  .map((word) => word.trim())
-                  .filter((word) => word !== "");
-                if (words.length > 0) {
-                  state.words = words;
-                  state.step = 0;
-                  state.input = "";
-                  state.error = false;
-                  state.success = false;
-                  state.showMenu = false; // Close menu after upload
-                  // Save to localStorage so it's persistent on reload
-                  localStorage.setItem("customWords", JSON.stringify(words));
-                  safeRender(true);
-                }
-              };
-              reader.readAsText(file);
-            }
-          });
-        }
-
         // Start button event
         const startBtn = document.getElementById("startBtn");
         if (startBtn) {
@@ -343,17 +275,28 @@
         errorAudio.play();
       }
 
-      // Menu Icon SVG (Hamburger)
-      function menuIconSVG() {
-        return `
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-8 h-8">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        `;
-      }
-
-      // Initial render
-      renderApp();
+      // Load the word list from word.txt (located in the root directory)
+      fetch("word.txt")
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          return response.text();
+        })
+        .then((text) => {
+          const words = text
+            .split(/\r?\n/)
+            .map((word) => word.trim())
+            .filter((word) => word !== "");
+          if (words.length > 0) {
+            state.words = words;
+          }
+          renderApp();
+        })
+        .catch((error) => {
+          console.error("Error loading words from word.txt:", error);
+          renderApp();
+        });
     </script>
   </body>
 </html>
