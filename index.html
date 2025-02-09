@@ -74,7 +74,7 @@
       .neumorphic-card {
         background: rgba(255, 255, 255, 0.15);
         border-radius: 1rem;
-        box-shadow: 8px 8px 16px rgba(0, 0, 0, 0.2), 
+        box-shadow: 8px 8px 16px rgba(0, 0, 0, 0.2),
                     -8px -8px 16px rgba(255, 255, 255, 0.1);
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
@@ -131,24 +131,14 @@
         });
       });
 
-      // Global state
+      // Global state without a default word list – words will come solely from word.txt.
       const state = {
         step: 0,
         input: "",
         error: false,
         success: false,
         started: false,
-        // Default word list (fallback)
-        words: [
-          "Elephant",
-          "Banana",
-          "Rainbow",
-          "Computer",
-          "Mountain",
-          "hello",
-          "hi",
-          "goodbye"
-        ]
+        words: []
       };
 
       // safeRender: Preserves caret position if autoFocus is true.
@@ -290,12 +280,20 @@
             .filter((word) => word !== "");
           if (words.length > 0) {
             state.words = words;
+            renderApp();
+          } else {
+            document.getElementById("app").innerHTML = `
+              <div class="text-center text-4xl font-extrabold">
+                Word list is empty in word.txt.
+              </div>`;
           }
-          renderApp();
         })
         .catch((error) => {
           console.error("Error loading words from word.txt:", error);
-          renderApp();
+          document.getElementById("app").innerHTML = `
+            <div class="text-center text-4xl font-extrabold">
+              Error loading word list.
+            </div>`;
         });
     </script>
   </body>
