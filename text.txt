@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Spelling Learning App</title>
+    <!-- Tailwind CSS via CDN -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <!-- Google Fonts for Space Mono, Quantico, and Carme -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Carme&family=Quantico&family=Space+Mono&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Space Mono", monospace;
+      }
+      h1,
+      h2 {
+        font-family: "Quantico", sans-serif;
+      }
+      /* The displayed word uses the Carme font */
+      .word {
+        font-family: "Carme", cursive;
+      }
+      /* Simple fade and scale animation */
+      @keyframes fadeInScale {
+        from {
+          opacity: 0;
+          transform: scale(0.8);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+      .animate-fadeInScale {
+        animation: fadeInScale 0.5s ease-out forwards;
+      }
+      /* Glossy dark purple input style with transparency, backdrop blur, and a glossy finish */
+      .glossy-input {
+        background: linear-gradient(145deg, rgba(45, 3, 59, 0.8), rgba(83, 31, 142, 0.8));
+        color: white;
+        border: none;
+        border-radius: 0.5rem;
+        box-shadow: inset 2px 2px 8px rgba(255, 255, 255, 0.2),
+          inset -2px -2px 8px rgba(0, 0, 0, 0.2);
+        transition: border 0.3s, box-shadow 0.3s;
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+      }
+      .glossy-input::placeholder {
+        color: #ddd;
+      }
+      /* Progress bar container & bar styling */
+      .progress-container {
+        width: 100%;
+        height: 8px;
+        background: #2d2d2d;
+        border-radius: 9999px;
+        margin-bottom: 1rem;
+      }
+      .progress-bar {
+        height: 100%;
+        border-radius: 9999px;
+        background: linear-gradient(145deg, #531F8E, #7a0f6c);
+        transition: width 0.3s ease;
+      }
+      /* Neumorphic card styling for a soft, layered look */
+      .neumorphic-card {
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 1rem;
+        box-shadow: 8px 8px 16px rgba(0, 0, 0, 0.2), 
+                    -8px -8px 16px rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+      }
+    </style>
+  </head>
+  <body class="bg-black relative text-white">
+    <!-- Particles.js Background -->
+    <div id="particles-js" class="absolute inset-0 z-0"></div>
+    <!-- Background Image Overlay -->
+    <div
+      class="absolute inset-0 z-[-1]"
+      style="background-image: url('https://images.wallpapersden.com/image/wxl-ubuntu-19-10_66736.jpg'); background-size: cover; background-position: center; background-blend-mode: multiply; background-color: rgba(30, 20, 50, 0.8);"
+    ></div>
+
+    <!-- Main App Container -->
+    <div id="app" class="relative flex flex-col items-center justify-center min-h-screen"></div>
+
+    <!-- Developer Credit Footer -->
+    <footer class="absolute bottom-2 w-full text-center text-gray-300 text-sm font-light">
+      Made By VaishakhSer
+    </footer>
+
+    <!-- Load particles.js -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <!-- Vanilla JavaScript Code -->
+    <script>
+      // Particles.js setup
+      document.addEventListener("DOMContentLoaded", function () {
+        particlesJS("particles-js", {
+          particles: {
+            number: { value: 80 },
+            color: { value: "#ffffff" },
+            shape: { type: "circle" },
+            opacity: { value: 0.5 },
+            size: { value: 3, random: true },
+            line_linked: {
+              enable: true,
+              distance: 150,
+              color: "#ffffff",
+              opacity: 0.4,
+              width: 1,
+            },
+            move: { speed: 2 },
+          },
+          interactivity: {
+            detect_on: "canvas",
+            events: {
+              onhover: { enable: true, mode: "repulse" },
+              onclick: { enable: true, mode: "push" },
+            },
+          },
+          retina_detect: true,
+        });
+      });
+
+      // Global state
+      const state = {
+        step: 0,
+        input: "",
+        error: false,
+        success: false,
+        started: false,
+        // Default word list (text‑only version)
+        words: [
+          "Elephant",
+          "Banana",
+          "Rainbow",
+          "Computer",
+          "Mountain",
+          "hello",
+          "hi",
+          "goodbye"
+        ],
+        showMenu: false
+      };
+
+      // If custom words are stored in localStorage, load them
+      if (localStorage.getItem("customWords")) {
+        try {
+          const customWords = JSON.parse(localStorage.getItem("customWords"));
+          if (Array.isArray(customWords) && customWords.length > 0) {
+            state.words = customWords;
+          }
+        } catch (e) {
+          console.error("Error parsing customWords from localStorage:", e);
+        }
+      }
+
+      // safeRender: Preserves caret position if autoFocus is true.
+      function safeRender(autoFocus = false) {
+        const textInput = document.getElementById("textInput");
+        let caret = null;
+        if (textInput) {
+          caret = textInput.selectionStart;
+        }
+        renderApp(autoFocus);
+        const newInput = document.getElementById("textInput");
+        if (newInput && autoFocus && caret !== null) {
+          newInput.focus();
+          newInput.setSelectionRange(caret, caret);
+        } else if (newInput && autoFocus) {
+          newInput.focus();
+        }
+      }
+
+      // renderApp: Renders the app. If autoFocus is true, focuses the input after rendering.
+      function renderApp(autoFocus = false) {
+        const app = document.getElementById("app");
+        let content = "";
+
+        // Menu button
+        content += `
+          <button id="menuBtn" class="absolute top-5 left-5 bg-white bg-opacity-20 p-3 rounded-full shadow-lg hover:bg-opacity-30 transition">
+            ${menuIconSVG()}
+          </button>
+        `;
+
+        // Menu panel with file input for custom word list
+        if (state.showMenu) {
+          content += `
+            <div id="menuPanel" class="absolute top-16 left-5 p-4 bg-black bg-opacity-70 rounded-lg text-white shadow-lg">
+              <label class="block text-sm mb-1">Upload Word List:</label>
+              <input id="wordFileInput" type="file" accept=".txt" class="text-sm bg-gray-800 p-2 rounded">
+            </div>
+          `;
+        }
+
+        if (!state.started) {
+          // Start screen
+          content += `
+            <div id="startScreen" class="text-center z-10 animate-fadeInScale">\n
+              <h1 class="text-5xl font-extrabold mb-8">Spelling Learning</h1>\n
+              <button id="startBtn" class="bg-gradient-to-r from-purple-500 to-indigo-500 px-8 py-4 rounded-full text-lg shadow-lg hover:from-purple-600 hover:to-indigo-600 transition">\n
+                Start\n
+              </button>\n
+            </div>\n
+          `;
+        } else if (state.step < state.words.length) {
+          // Determine border color based on state
+          let inputBorderClass = "border-gray-300";
+          if (state.error) {
+            inputBorderClass = "border-red-500 animate-pulse";
+          } else if (state.success) {
+            inputBorderClass = "border-green-500 animate-pulse";
+          }
+          // Calculate progress percent
+          const progressPercent = (state.step / state.words.length) * 100;
+
+          // Main card: display current word, progress bar, and input field
+          content += `
+            <div id="card" class="w-96 p-6 rounded-xl neumorphic-card text-center z-10 mb-4">\n
+              <div class="progress-container mb-4">\n
+                <div class="progress-bar" style="width: ${progressPercent}%;"></div>\n
+              </div>\n
+              <h2 class="word text-3xl font-semibold mb-4">${state.words[state.step]}</h2>\n
+              <input id="textInput" class="w-full p-4 text-lg rounded-md border-2 transition-colors duration-300 glossy-input ${inputBorderClass}" value="${state.input}" placeholder="Type here...">\n
+            </div>\n
+          `;
+        } else {
+          // End screen
+          content += `<h2 class="text-4xl font-extrabold z-10">Well done! 🎉</h2>`;
+        }
+
+        app.innerHTML = content;
+        attachListeners();
+        if (autoFocus) {
+          const inputField = document.getElementById("textInput");
+          if (inputField) inputField.focus();
+        }
+      }
+
+      // Attach event listeners
+      function attachListeners() {
+        // Toggle menu button
+        const menuBtn = document.getElementById("menuBtn");
+        if (menuBtn) {
+          menuBtn.addEventListener("click", () => {
+            state.showMenu = !state.showMenu;
+            renderApp(); // Re-render without autoFocus on menu toggle
+          });
+        }
+
+        // File input for custom word list
+        const fileInput = document.getElementById("wordFileInput");
+        if (fileInput) {
+          fileInput.addEventListener("change", (e) => {
+            const file = e.target.files[0];
+            if (file) {
+              const reader = new FileReader();
+              reader.onload = function (e) {
+                const text = e.target.result;
+                const words = text
+                  .split(/\r?\n/)
+                  .map((word) => word.trim())
+                  .filter((word) => word !== "");
+                if (words.length > 0) {
+                  state.words = words;
+                  state.step = 0;
+                  state.input = "";
+                  state.error = false;
+                  state.success = false;
+                  state.showMenu = false; // Close menu after upload
+                  // Save to localStorage so it's persistent on reload
+                  localStorage.setItem("customWords", JSON.stringify(words));
+                  safeRender(true);
+                }
+              };
+              reader.readAsText(file);
+            }
+          });
+        }
+
+        // Start button event
+        const startBtn = document.getElementById("startBtn");
+        if (startBtn) {
+          startBtn.addEventListener("click", () => {
+            state.started = true;
+            safeRender(true);
+          });
+        }
+
+        // Input field events
+        const textInput = document.getElementById("textInput");
+        if (textInput) {
+          // Update state.input on input without re-rendering
+          textInput.addEventListener("input", (e) => {
+            state.input = e.target.value;
+          });
+          // On Enter key submission, validate answer and re-render using safeRender
+          textInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+              const currentWord = state.words[state.step];
+              if (state.input.trim().toLowerCase() === currentWord.toLowerCase()) {
+                state.success = true;
+                state.error = false;
+                speakWord(currentWord);
+                safeRender(true);
+                setTimeout(() => {
+                  state.step++;
+                  state.input = "";
+                  state.success = false;
+                  safeRender(true);
+                }, 1500);
+              } else {
+                state.error = true;
+                playErrorSound();
+                safeRender(true);
+              }
+            }
+          });
+        }
+      }
+
+      // Speech synthesis for the word
+      function speakWord(word) {
+        const synth = window.speechSynthesis;
+        const utterance = new SpeechSynthesisUtterance(word);
+        utterance.lang = "en-IN";
+        utterance.rate = 0.6;
+        synth.speak(utterance);
+      }
+
+      // Play Windows XP error sound
+      function playErrorSound() {
+        const errorAudio = new Audio("https://www.myinstants.com/media/sounds/windows-xp-error.mp3");
+        errorAudio.play();
+      }
+
+      // Menu Icon SVG (Hamburger)
+      function menuIconSVG() {
+        return `
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-8 h-8">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        `;
+      }
+
+      // Initial render
+      renderApp();
+    </script>
+  </body>
+</html>
