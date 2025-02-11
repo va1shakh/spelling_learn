@@ -43,11 +43,7 @@
       }
       /* Glossy dark purple input style with transparency, backdrop blur, and a glossy finish */
       .glossy-input {
-        background: linear-gradient(
-          145deg,
-          rgba(45, 3, 59, 0.8),
-          rgba(83, 31, 142, 0.8)
-        );
+        background: linear-gradient(145deg, rgba(45, 3, 59, 0.8), rgba(83, 31, 142, 0.8));
         color: white;
         border: none;
         border-radius: 0.5rem;
@@ -169,12 +165,12 @@
         words: [],
       };
 
-      // renderApp: Renders the UI based on current state.
+      // renderApp: Renders the UI based on the current state.
       function renderApp() {
         const app = document.getElementById("app");
         let content = "";
         if (!state.started) {
-          // Start screen
+          // Start screen.
           content += `
             <div id="startScreen" class="text-center z-10 animate-fadeInScale">
               <h1 class="text-5xl font-extrabold mb-8">Spelling Learning</h1>
@@ -184,14 +180,14 @@
             </div>
           `;
         } else if (state.step < state.words.length) {
-          // Determine border color for the input field.
+          // Determine input border color.
           let inputBorderClass = "border-gray-300";
           if (state.error) {
             inputBorderClass = "border-red-500 animate-pulse";
           } else if (state.success) {
             inputBorderClass = "border-green-500 animate-pulse";
           }
-          // Calculate progress percent.
+          // Calculate progress percentage.
           const progressPercent = (state.step / state.words.length) * 100;
           // Main card: current word, progress bar, input field, and Back button.
           content += `
@@ -207,14 +203,14 @@
             </div>
           `;
         } else {
-          // End screen
+          // End screen.
           content += `<h2 class="text-4xl font-extrabold z-10">Well done! 🎉</h2>`;
         }
         app.innerHTML = content;
         attachListeners();
       }
 
-      // safeRender: Re-renders and optionally focuses the input.
+      // safeRender: Re-renders the UI and, if requested, focuses the input.
       function safeRender(autoFocus = false) {
         renderApp();
         if (autoFocus) {
@@ -225,7 +221,7 @@
         }
       }
 
-      // attachListeners: Sets up event listeners for dynamic elements.
+      // attachListeners: Sets up event listeners on dynamic elements.
       function attachListeners() {
         // Start button.
         const startBtn = document.getElementById("startBtn");
@@ -249,7 +245,7 @@
           textInput.addEventListener("input", (e) => {
             state.input = e.target.value;
           });
-          // Handle Enter key for submission and Tab key for back action.
+          // Handle Enter key for submission.
           textInput.addEventListener("keydown", (e) => {
             if (e.key === "Enter") {
               const currentWord = state.words[state.step];
@@ -269,16 +265,24 @@
                 playErrorSound();
                 safeRender(true);
               }
-            } else if (e.key === "Tab") {
-              // Prevent default tabbing behavior and trigger back action.
-              e.preventDefault();
-              handleBack();
             }
           });
         }
       }
 
-      // handleBack: Clears the current input (letting the user retype).
+      // Global Tab key listener: when the input is focused and Tab is pressed, trigger the Back action.
+      document.addEventListener("keydown", function (e) {
+        if (
+          document.activeElement &&
+          document.activeElement.id === "textInput" &&
+          e.key === "Tab"
+        ) {
+          e.preventDefault();
+          handleBack();
+        }
+      });
+
+      // handleBack: Clears the current input so the user can retype.
       function handleBack() {
         state.input = "";
         state.error = false;
@@ -286,7 +290,7 @@
         safeRender(true);
       }
 
-      // speakWord: Uses speech synthesis to speak the word.
+      // speakWord: Uses the Speech Synthesis API to speak the word.
       function speakWord(word) {
         const synth = window.speechSynthesis;
         const utterance = new SpeechSynthesisUtterance(word);
