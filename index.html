@@ -131,14 +131,15 @@
         });
       });
 
-      // Global state without a default word list – words will come solely from word.txt.
+      // Global state – added an "answers" array to store typed words.
       const state = {
         step: 0,
         input: "",
         error: false,
         success: false,
         started: false,
-        words: []
+        words: [],
+        answers: [] // stores previously typed words
       };
 
       // safeRender: Preserves caret position if autoFocus is true.
@@ -184,7 +185,7 @@
           // Calculate progress percent
           const progressPercent = (state.step / state.words.length) * 100;
 
-          // Main card: display current word, progress bar, input field, and back button (always visible)
+          // Main card: display current word, progress bar, input field, and (if applicable) Back button
           content += `
             <div id="card" class="w-96 p-6 rounded-xl neumorphic-card text-center z-10 mb-4">
               <div class="progress-container mb-4">
@@ -192,7 +193,14 @@
               </div>
               <h2 class="word text-3xl font-semibold mb-4">${state.words[state.step]}</h2>
               <input id="textInput" class="w-full p-4 text-lg rounded-md border-2 transition-colors duration-300 glossy-input ${inputBorderClass}" value="${state.input}" placeholder="Type here...">
-              <button id="backBtn" class="bg-gradient-to-r from-purple-500 to-indigo-500 px-8 py-4 rounded-full text-lg shadow-lg hover:from-purple-600 hover:to-indigo-600 transition mt-4">Back</button>
+              ${
+                // Only show Back button if not on the first word
+                state.step > 0
+                  ? `<button id="backBtn" class="mt-4 bg-gradient-to-r from-purple-500 to-indigo-500 px-6 py-2 rounded-full text-lg shadow-lg hover:from-purple-600 hover:to-indigo-600 transition">
+                       Back
+                     </button>`
+                  : ""
+              }
             </div>
           `;
         } else {
@@ -219,11 +227,16 @@
           });
         }
 
-        // Back button event
+        // Back button event – go to the previous step and show the previously typed word.
         const backBtn = document.getElementById("backBtn");
         if (backBtn) {
           backBtn.addEventListener("click", () => {
-            handleBack();
+            if (state.step > 0) {
+              state.step--;
+              // Restore the previous answer if available
+              state.input = state.answers[state.step] || "";
+              safeRender(true);
+            }
           });
         }
 
@@ -234,7 +247,7 @@
           textInput.addEventListener("input", (e) => {
             state.input = e.target.value;
           });
-          // On keydown submission and shortcut for back
+          // On Enter key submission, validate answer and re-render using safeRender
           textInput.addEventListener("keydown", (e) => {
             if (e.key === "Enter") {
               const currentWord = state.words[state.step];
@@ -242,6 +255,8 @@
                 state.success = true;
                 state.error = false;
                 speakWord(currentWord);
+                // Save the correctly typed answer for review when going back.
+                state.answers[state.step] = state.input;
                 safeRender(true);
                 setTimeout(() => {
                   state.step++;
@@ -254,21 +269,9 @@
                 playErrorSound();
                 safeRender(true);
               }
-            } else if (e.key === "Tab") {
-              // Use Tab key as shortcut for Back button
-              e.preventDefault();
-              handleBack();
             }
           });
         }
-      }
-
-      // Function to handle the back action: clear the input so that the user can retype the word
-      function handleBack() {
-        state.input = "";
-        state.error = false;
-        state.success = false;
-        safeRender(true);
       }
 
       // Speech synthesis for the word
