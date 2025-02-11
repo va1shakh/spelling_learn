@@ -184,7 +184,7 @@
           // Calculate progress percent
           const progressPercent = (state.step / state.words.length) * 100;
 
-          // Main card: display current word, progress bar, input field, and back button (if applicable)
+          // Main card: display current word, progress bar, input field, and back button (always visible)
           content += `
             <div id="card" class="w-96 p-6 rounded-xl neumorphic-card text-center z-10 mb-4">
               <div class="progress-container mb-4">
@@ -192,11 +192,7 @@
               </div>
               <h2 class="word text-3xl font-semibold mb-4">${state.words[state.step]}</h2>
               <input id="textInput" class="w-full p-4 text-lg rounded-md border-2 transition-colors duration-300 glossy-input ${inputBorderClass}" value="${state.input}" placeholder="Type here...">
-              ${
-                state.step > 0
-                  ? `<button id="backBtn" class="bg-gradient-to-r from-purple-500 to-indigo-500 px-8 py-4 rounded-full text-lg shadow-lg hover:from-purple-600 hover:to-indigo-600 transition mt-4">Back</button>`
-                  : ""
-              }
+              <button id="backBtn" class="bg-gradient-to-r from-purple-500 to-indigo-500 px-8 py-4 rounded-full text-lg shadow-lg hover:from-purple-600 hover:to-indigo-600 transition mt-4">Back</button>
             </div>
           `;
         } else {
@@ -267,15 +263,12 @@
         }
       }
 
-      // Function to handle the back action: go back one step and let user retype the word
+      // Function to handle the back action: clear the input so that the user can retype the word
       function handleBack() {
-        if (state.step > 0) {
-          state.step--;
-          state.input = "";
-          state.error = false;
-          state.success = false;
-          safeRender(true);
-        }
+        state.input = "";
+        state.error = false;
+        state.success = false;
+        safeRender(true);
       }
 
       // Speech synthesis for the word
