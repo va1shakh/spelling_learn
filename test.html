@@ -41,6 +41,20 @@
       .animate-fadeInScale {
         animation: fadeInScale 0.5s ease-out forwards;
       }
+      /* Slide-in animation for dynamic transitions */
+      @keyframes slideIn {
+        from {
+          transform: translateY(20px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+      .animate-slideIn {
+        animation: slideIn 0.5s ease-out forwards;
+      }
       /* Glossy dark purple input style with transparency, backdrop blur, and a glossy finish */
       .glossy-input {
         background: linear-gradient(145deg, rgba(45, 3, 59, 0.8), rgba(83, 31, 142, 0.8));
@@ -52,9 +66,15 @@
         transition: border 0.3s, box-shadow 0.3s;
         backdrop-filter: blur(4px);
         -webkit-backdrop-filter: blur(4px);
+        opacity: 0;
+        animation: fadeIn 0.5s forwards 0.2s;
       }
       .glossy-input::placeholder {
         color: #ddd;
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
       }
       /* Progress bar container & bar styling */
       .progress-container {
@@ -75,9 +95,18 @@
         background: rgba(255, 255, 255, 0.15);
         border-radius: 1rem;
         box-shadow: 8px 8px 16px rgba(0, 0, 0, 0.2),
-                    -8px -8px 16px rgba(255, 255, 255, 0.1);
+          -8px -8px 16px rgba(255, 255, 255, 0.1);
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
+        opacity: 0;
+        animation: slideIn 0.5s ease-out forwards;
+      }
+      /* Hover animation for buttons */
+      button {
+        transition: transform 0.3s ease;
+      }
+      button:hover {
+        transform: scale(1.05);
       }
     </style>
   </head>
@@ -147,10 +176,9 @@
 
       // Function to trigger confetti animation
       function triggerConfetti() {
-        // Confetti burst using canvas-confetti
         confetti({
-          particleCount: 100,
-          spread: 70,
+          particleCount: 150,
+          spread: 80,
           origin: { y: 0.6 }
         });
       }
@@ -207,7 +235,6 @@
               <h2 class="word text-3xl font-semibold mb-4">${state.words[state.step]}</h2>
               <input id="textInput" class="w-full p-4 text-lg rounded-md border-2 transition-colors duration-300 glossy-input ${inputBorderClass}" value="${state.input}" placeholder="Type here...">
               ${
-                // Only show Back button if not on the first word, with tooltip indicating the shortcut.
                 state.step > 0
                   ? `<button id="backBtn" title="Press Ctrl + Enter" class="mt-4 bg-gradient-to-r from-purple-500 to-indigo-500 px-6 py-2 rounded-full text-lg shadow-lg hover:from-purple-600 hover:to-indigo-600 transition">
                        Back
@@ -218,7 +245,7 @@
           `;
         } else {
           // End screen
-          content += `<h2 class="text-4xl font-extrabold z-10">Well done! 🎉</h2>`;
+          content += `<h2 class="text-4xl font-extrabold z-10 animate-fadeInScale">Well done! 🎉</h2>`;
         }
 
         app.innerHTML = content;
@@ -253,7 +280,6 @@
           backBtn.addEventListener("click", () => {
             if (state.step > 0) {
               state.step--;
-              // Restore the previous answer if available
               state.input = state.answers[state.step] || "";
               safeRender(true);
             }
@@ -263,11 +289,9 @@
         // Input field events
         const textInput = document.getElementById("textInput");
         if (textInput) {
-          // Update state.input on input without re-rendering
           textInput.addEventListener("input", (e) => {
             state.input = e.target.value;
           });
-          // On keydown, check for Ctrl+Enter for back functionality or Enter for submission
           textInput.addEventListener("keydown", (e) => {
             // Ctrl + Enter shortcut for back functionality
             if (e.key === "Enter" && e.ctrlKey) {
@@ -286,7 +310,6 @@
                 state.success = true;
                 state.error = false;
                 speakWord(currentWord);
-                // Save the correctly typed answer for review when going back.
                 state.answers[state.step] = state.input;
                 safeRender(true);
                 setTimeout(() => {
