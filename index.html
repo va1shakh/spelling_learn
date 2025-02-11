@@ -75,7 +75,7 @@
         background: rgba(255, 255, 255, 0.15);
         border-radius: 1rem;
         box-shadow: 8px 8px 16px rgba(0, 0, 0, 0.2),
-                    -8px -8px 16px rgba(255, 255, 255, 0.1);
+          -8px -8px 16px rgba(255, 255, 255, 0.1);
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
       }
@@ -165,24 +165,17 @@
         words: []
       };
 
-      // safeRender: Preserves caret position if autoFocus is true.
+      // safeRender: Renders the app and focuses the input if needed.
+      // (Simplified without caret preservation to ensure clearing works reliably.)
       function safeRender(autoFocus = false) {
-        const textInput = document.getElementById("textInput");
-        let caret = null;
-        if (textInput) {
-          caret = textInput.selectionStart;
-        }
         renderApp(autoFocus);
-        const newInput = document.getElementById("textInput");
-        if (newInput && autoFocus && caret !== null) {
-          newInput.focus();
-          newInput.setSelectionRange(caret, caret);
-        } else if (newInput && autoFocus) {
-          newInput.focus();
+        if (autoFocus) {
+          const newInput = document.getElementById("textInput");
+          if (newInput) newInput.focus();
         }
       }
 
-      // renderApp: Renders the app and focuses the input if needed.
+      // renderApp: Renders the UI.
       function renderApp(autoFocus = false) {
         const app = document.getElementById("app");
         let content = "";
@@ -247,6 +240,7 @@
         const backBtn = document.getElementById("backBtn");
         if (backBtn) {
           backBtn.addEventListener("click", () => {
+            console.log("Back button clicked");
             handleBack();
           });
         }
@@ -281,6 +275,7 @@
             } else if (e.key === "Tab") {
               // Use Tab key as shortcut for Back action.
               e.preventDefault();
+              console.log("Tab key pressed for Back action");
               handleBack();
             }
           });
