@@ -79,6 +79,29 @@
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
       }
+      /* Tooltip for back button on hover */
+      #backBtn {
+        position: relative;
+      }
+      #backBtn::after {
+        content: "Press Tab key instead";
+        position: absolute;
+        bottom: 120%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(45, 3, 59, 0.8);
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        font-size: 0.875rem;
+        opacity: 0;
+        transition: opacity 0.2s ease-in-out;
+        pointer-events: none;
+        white-space: nowrap;
+      }
+      #backBtn:hover::after {
+        opacity: 1;
+      }
     </style>
   </head>
   <body class="bg-black relative text-white">
