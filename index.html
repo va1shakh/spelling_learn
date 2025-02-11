@@ -247,8 +247,19 @@
           textInput.addEventListener("input", (e) => {
             state.input = e.target.value;
           });
-          // On Enter key submission, validate answer and re-render using safeRender
+          // On keydown, check for Ctrl+Enter for back functionality or Enter for submission
           textInput.addEventListener("keydown", (e) => {
+            // Ctrl + Enter shortcut for back functionality
+            if (e.key === "Enter" && e.ctrlKey) {
+              e.preventDefault();
+              if (state.step > 0) {
+                state.step--;
+                state.input = state.answers[state.step] || "";
+                safeRender(true);
+              }
+              return;
+            }
+            // Regular Enter key for submission
             if (e.key === "Enter") {
               const currentWord = state.words[state.step];
               if (state.input.trim().toLowerCase() === currentWord.toLowerCase()) {
