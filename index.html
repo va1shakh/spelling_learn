@@ -75,33 +75,9 @@
         background: rgba(255, 255, 255, 0.15);
         border-radius: 1rem;
         box-shadow: 8px 8px 16px rgba(0, 0, 0, 0.2),
-          -8px -8px 16px rgba(255, 255, 255, 0.1);
+                    -8px -8px 16px rgba(255, 255, 255, 0.1);
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
-      }
-      /* Tooltip for Back button on hover */
-      #backBtn {
-        position: relative;
-        overflow: visible;
-      }
-      #backBtn::after {
-        content: "Press Tab key instead";
-        position: absolute;
-        bottom: 120%;
-        left: 50%;
-        transform: translateX(-50%);
-        background: rgba(45, 3, 59, 0.8);
-        color: white;
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.25rem;
-        font-size: 0.875rem;
-        opacity: 0;
-        transition: opacity 0.1s ease-in-out;
-        pointer-events: none;
-        white-space: nowrap;
-      }
-      #backBtn:hover::after {
-        opacity: 1;
       }
     </style>
   </head>
@@ -155,22 +131,40 @@
         });
       });
 
-      // Global state – words are loaded from word.txt.
+      // Global state without a default word list – words will come solely from word.txt.
       const state = {
         step: 0,
         input: "",
         error: false,
         success: false,
         started: false,
-        words: [],
+        words: []
       };
 
-      // renderApp: Renders the UI based on the current state.
-      function renderApp() {
+      // safeRender: Preserves caret position if autoFocus is true.
+      function safeRender(autoFocus = false) {
+        const textInput = document.getElementById("textInput");
+        let caret = null;
+        if (textInput) {
+          caret = textInput.selectionStart;
+        }
+        renderApp(autoFocus);
+        const newInput = document.getElementById("textInput");
+        if (newInput && autoFocus && caret !== null) {
+          newInput.focus();
+          newInput.setSelectionRange(caret, caret);
+        } else if (newInput && autoFocus) {
+          newInput.focus();
+        }
+      }
+
+      // renderApp: Renders the app. If autoFocus is true, focuses the input after rendering.
+      function renderApp(autoFocus = false) {
         const app = document.getElementById("app");
         let content = "";
+
         if (!state.started) {
-          // Start screen.
+          // Start screen
           content += `
             <div id="startScreen" class="text-center z-10 animate-fadeInScale">
               <h1 class="text-5xl font-extrabold mb-8">Spelling Learning</h1>
@@ -180,16 +174,17 @@
             </div>
           `;
         } else if (state.step < state.words.length) {
-          // Determine input border color.
+          // Determine border color based on state
           let inputBorderClass = "border-gray-300";
           if (state.error) {
             inputBorderClass = "border-red-500 animate-pulse";
           } else if (state.success) {
             inputBorderClass = "border-green-500 animate-pulse";
           }
-          // Calculate progress percentage.
+          // Calculate progress percent
           const progressPercent = (state.step / state.words.length) * 100;
-          // Main card: current word, progress bar, input field, and Back button.
+
+          // Main card: display current word, progress bar, input field, and back button (always visible)
           content += `
             <div id="card" class="w-96 p-6 rounded-xl neumorphic-card text-center z-10 mb-4">
               <div class="progress-container mb-4">
@@ -197,33 +192,25 @@
               </div>
               <h2 class="word text-3xl font-semibold mb-4">${state.words[state.step]}</h2>
               <input id="textInput" class="w-full p-4 text-lg rounded-md border-2 transition-colors duration-300 glossy-input ${inputBorderClass}" value="${state.input}" placeholder="Type here...">
-              <button id="backBtn" class="bg-gradient-to-r from-purple-500 to-indigo-500 px-8 py-4 rounded-full text-lg shadow-lg hover:from-purple-600 hover:to-indigo-600 transition mt-4">
-                Back
-              </button>
+              <button id="backBtn" class="bg-gradient-to-r from-purple-500 to-indigo-500 px-8 py-4 rounded-full text-lg shadow-lg hover:from-purple-600 hover:to-indigo-600 transition mt-4">Back</button>
             </div>
           `;
         } else {
-          // End screen.
+          // End screen
           content += `<h2 class="text-4xl font-extrabold z-10">Well done! 🎉</h2>`;
         }
+
         app.innerHTML = content;
         attachListeners();
-      }
-
-      // safeRender: Re-renders the UI and, if requested, focuses the input.
-      function safeRender(autoFocus = false) {
-        renderApp();
         if (autoFocus) {
-          const newInput = document.getElementById("textInput");
-          if (newInput) {
-            newInput.focus();
-          }
+          const inputField = document.getElementById("textInput");
+          if (inputField) inputField.focus();
         }
       }
 
-      // attachListeners: Sets up event listeners on dynamic elements.
+      // Attach event listeners
       function attachListeners() {
-        // Start button.
+        // Start button event
         const startBtn = document.getElementById("startBtn");
         if (startBtn) {
           startBtn.addEventListener("click", () => {
@@ -231,21 +218,23 @@
             safeRender(true);
           });
         }
-        // Back button.
+
+        // Back button event
         const backBtn = document.getElementById("backBtn");
         if (backBtn) {
           backBtn.addEventListener("click", () => {
             handleBack();
           });
         }
-        // Input field.
+
+        // Input field events
         const textInput = document.getElementById("textInput");
         if (textInput) {
-          // Update state.input as the user types.
+          // Update state.input on input without re-rendering
           textInput.addEventListener("input", (e) => {
             state.input = e.target.value;
           });
-          // Handle Enter key for submission.
+          // On keydown submission and shortcut for back
           textInput.addEventListener("keydown", (e) => {
             if (e.key === "Enter") {
               const currentWord = state.words[state.step];
@@ -265,24 +254,16 @@
                 playErrorSound();
                 safeRender(true);
               }
+            } else if (e.key === "Tab") {
+              // Use Tab key as shortcut for Back button
+              e.preventDefault();
+              handleBack();
             }
           });
         }
       }
 
-      // Global Tab key listener: when the input is focused and Tab is pressed, trigger the Back action.
-      document.addEventListener("keydown", function (e) {
-        if (
-          document.activeElement &&
-          document.activeElement.id === "textInput" &&
-          e.key === "Tab"
-        ) {
-          e.preventDefault();
-          handleBack();
-        }
-      });
-
-      // handleBack: Clears the current input so the user can retype.
+      // Function to handle the back action: clear the input so that the user can retype the word
       function handleBack() {
         state.input = "";
         state.error = false;
@@ -290,7 +271,7 @@
         safeRender(true);
       }
 
-      // speakWord: Uses the Speech Synthesis API to speak the word.
+      // Speech synthesis for the word
       function speakWord(word) {
         const synth = window.speechSynthesis;
         const utterance = new SpeechSynthesisUtterance(word);
@@ -299,13 +280,13 @@
         synth.speak(utterance);
       }
 
-      // playErrorSound: Plays an error sound.
+      // Play Windows XP error sound
       function playErrorSound() {
         const errorAudio = new Audio("https://www.myinstants.com/media/sounds/windows-xp-error.mp3");
         errorAudio.play();
       }
 
-      // Load the word list from word.txt.
+      // Load the word list from word.txt (located in the root directory)
       fetch("word.txt")
         .then((response) => {
           if (!response.ok) {
