@@ -1,1 +1,335 @@
-aaa
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Spelling Learning App</title>
+    <!-- Tailwind CSS via CDN -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <!-- Google Fonts for Space Mono, Quantico, and Carme -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Carme&family=Quantico&family=Space+Mono&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* Font settings */
+      body {
+        font-family: "Space Mono", monospace;
+      }
+      h1,
+      h2 {
+        font-family: "Quantico", sans-serif;
+      }
+      /* The displayed word uses the Carme font */
+      .word {
+        font-family: "Carme", cursive;
+      }
+      /* Simple fade and scale animation */
+      @keyframes fadeInScale {
+        from {
+          opacity: 0;
+          transform: scale(0.8);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+      .animate-fadeInScale {
+        animation: fadeInScale 0.5s ease-out forwards;
+      }
+      /* Glossy dark purple input style with transparency, backdrop blur, and a glossy finish */
+      .glossy-input {
+        background: linear-gradient(145deg, rgba(45, 3, 59, 0.8), rgba(83, 31, 142, 0.8));
+        color: white;
+        border: none;
+        border-radius: 0.5rem;
+        box-shadow: inset 2px 2px 8px rgba(255, 255, 255, 0.2),
+          inset -2px -2px 8px rgba(0, 0, 0, 0.2);
+        transition: border 0.3s, box-shadow 0.3s;
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+      }
+      .glossy-input::placeholder {
+        color: #ddd;
+      }
+      /* Progress bar container & bar styling */
+      .progress-container {
+        width: 100%;
+        height: 8px;
+        background: #2d2d2d;
+        border-radius: 9999px;
+        margin-bottom: 1rem;
+      }
+      .progress-bar {
+        height: 100%;
+        border-radius: 9999px;
+        background: linear-gradient(145deg, #531F8E, #7a0f6c);
+        transition: width 0.3s ease;
+      }
+      /* Neumorphic card styling for a soft, layered look */
+      .neumorphic-card {
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 1rem;
+        box-shadow: 8px 8px 16px rgba(0, 0, 0, 0.2),
+                    -8px -8px 16px rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+      }
+    </style>
+  </head>
+  <body class="bg-black relative text-white">
+    <!-- Particles.js Background -->
+    <div id="particles-js" class="absolute inset-0 z-0"></div>
+    <!-- Background Image Overlay -->
+    <div
+      class="absolute inset-0 z-[-1]"
+      style="background-image: url('https://images.wallpapersden.com/image/wxl-ubuntu-19-10_66736.jpg'); background-size: cover; background-position: center; background-blend-mode: multiply; background-color: rgba(30, 20, 50, 0.8);"
+    ></div>
+
+    <!-- Main App Container -->
+    <div id="app" class="relative flex flex-col items-center justify-center min-h-screen"></div>
+
+    <!-- Developer Credit Footer -->
+    <footer class="absolute bottom-2 w-full text-center text-gray-300 text-sm font-light">
+      Made By VaishakhSer
+    </footer>
+
+    <!-- Load particles.js -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <!-- Vanilla JavaScript Code -->
+    <script>
+      // Particles.js setup
+      document.addEventListener("DOMContentLoaded", function () {
+        particlesJS("particles-js", {
+          particles: {
+            number: { value: 80 },
+            color: { value: "#ffffff" },
+            shape: { type: "circle" },
+            opacity: { value: 0.5 },
+            size: { value: 3, random: true },
+            line_linked: {
+              enable: true,
+              distance: 150,
+              color: "#ffffff",
+              opacity: 0.4,
+              width: 1,
+            },
+            move: { speed: 2 },
+          },
+          interactivity: {
+            detect_on: "canvas",
+            events: {
+              onhover: { enable: true, mode: "repulse" },
+              onclick: { enable: true, mode: "push" },
+            },
+          },
+          retina_detect: true,
+        });
+      });
+
+      // Global state – added an "answers" array to store typed words.
+      const state = {
+        step: 0,
+        input: "",
+        error: false,
+        success: false,
+        started: false,
+        words: [],
+        answers: [] // stores previously typed words
+      };
+
+      // safeRender: Preserves caret position if autoFocus is true.
+      function safeRender(autoFocus = false) {
+        const textInput = document.getElementById("textInput");
+        let caret = null;
+        if (textInput) {
+          caret = textInput.selectionStart;
+        }
+        renderApp(autoFocus);
+        const newInput = document.getElementById("textInput");
+        if (newInput && autoFocus && caret !== null) {
+          newInput.focus();
+          newInput.setSelectionRange(caret, caret);
+        } else if (newInput && autoFocus) {
+          newInput.focus();
+        }
+      }
+
+      // renderApp: Renders the app. If autoFocus is true, focuses the input after rendering.
+      function renderApp(autoFocus = false) {
+        const app = document.getElementById("app");
+        let content = "";
+
+        if (!state.started) {
+          // Start screen
+          content += `
+            <div id="startScreen" class="text-center z-10 animate-fadeInScale">
+              <h1 class="text-5xl font-extrabold mb-8">Spelling Learning</h1>
+              <button id="startBtn" class="bg-gradient-to-r from-purple-500 to-indigo-500 px-8 py-4 rounded-full text-lg shadow-lg hover:from-purple-600 hover:to-indigo-600 transition">
+                Start
+              </button>
+            </div>
+          `;
+        } else if (state.step < state.words.length) {
+          // Determine border color based on state
+          let inputBorderClass = "border-gray-300";
+          if (state.error) {
+            inputBorderClass = "border-red-500 animate-pulse";
+          } else if (state.success) {
+            inputBorderClass = "border-green-500 animate-pulse";
+          }
+          // Calculate progress percent
+          const progressPercent = (state.step / state.words.length) * 100;
+
+          // Main card: display current word, progress bar, input field, and (if applicable) Back button with a tooltip
+          content += `
+            <div id="card" class="w-96 p-6 rounded-xl neumorphic-card text-center z-10 mb-4">
+              <div class="progress-container mb-4">
+                <div class="progress-bar" style="width: ${progressPercent}%;"></div>
+              </div>
+              <h2 class="word text-3xl font-semibold mb-4">${state.words[state.step]}</h2>
+              <input id="textInput" class="w-full p-4 text-lg rounded-md border-2 transition-colors duration-300 glossy-input ${inputBorderClass}" value="${state.input}" placeholder="Type here...">
+              ${
+                // Only show Back button if not on the first word, with a tooltip indicating the shortcut.
+                state.step > 0
+                  ? `<button id="backBtn" title="Press Ctrl + Enter" class="mt-4 bg-gradient-to-r from-purple-500 to-indigo-500 px-6 py-2 rounded-full text-lg shadow-lg hover:from-purple-600 hover:to-indigo-600 transition">
+                       Back
+                     </button>`
+                  : ""
+              }
+            </div>
+          `;
+        } else {
+          // End screen
+          content += `<h2 class="text-4xl font-extrabold z-10">Well done! 🎉</h2>`;
+        }
+
+        app.innerHTML = content;
+        attachListeners();
+        if (autoFocus) {
+          const inputField = document.getElementById("textInput");
+          if (inputField) inputField.focus();
+        }
+      }
+
+      // Attach event listeners
+      function attachListeners() {
+        // Start button event
+        const startBtn = document.getElementById("startBtn");
+        if (startBtn) {
+          startBtn.addEventListener("click", () => {
+            state.started = true;
+            safeRender(true);
+          });
+        }
+
+        // Back button event – go to the previous step and show the previously typed word.
+        const backBtn = document.getElementById("backBtn");
+        if (backBtn) {
+          backBtn.addEventListener("click", () => {
+            if (state.step > 0) {
+              state.step--;
+              // Restore the previous answer if available
+              state.input = state.answers[state.step] || "";
+              safeRender(true);
+            }
+          });
+        }
+
+        // Input field events
+        const textInput = document.getElementById("textInput");
+        if (textInput) {
+          // Update state.input on input without re-rendering
+          textInput.addEventListener("input", (e) => {
+            state.input = e.target.value;
+          });
+          // On keydown, check for Ctrl+Enter for back functionality or Enter for submission
+          textInput.addEventListener("keydown", (e) => {
+            // Ctrl + Enter shortcut for back functionality
+            if (e.key === "Enter" && e.ctrlKey) {
+              e.preventDefault();
+              if (state.step > 0) {
+                state.step--;
+                state.input = state.answers[state.step] || "";
+                safeRender(true);
+              }
+              return;
+            }
+            // Regular Enter key for submission
+            if (e.key === "Enter") {
+              const currentWord = state.words[state.step];
+              if (state.input.trim().toLowerCase() === currentWord.toLowerCase()) {
+                state.success = true;
+                state.error = false;
+                speakWord(currentWord);
+                // Save the correctly typed answer for review when going back.
+                state.answers[state.step] = state.input;
+                safeRender(true);
+                setTimeout(() => {
+                  state.step++;
+                  state.input = "";
+                  state.success = false;
+                  safeRender(true);
+                }, 1500);
+              } else {
+                state.error = true;
+                playErrorSound();
+                safeRender(true);
+              }
+            }
+          });
+        }
+      }
+
+      // Speech synthesis for the word
+      function speakWord(word) {
+        const synth = window.speechSynthesis;
+        const utterance = new SpeechSynthesisUtterance(word);
+        utterance.lang = "en-IN";
+        utterance.rate = 0.6;
+        synth.speak(utterance);
+      }
+
+      // Play Windows XP error sound
+      function playErrorSound() {
+        const errorAudio = new Audio("https://www.myinstants.com/media/sounds/windows-xp-error.mp3");
+        errorAudio.play();
+      }
+
+      // Load the word list from word.txt (located in the root directory)
+      fetch("word.txt")
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          return response.text();
+        })
+        .then((text) => {
+          const words = text
+            .split(/\r?\n/)
+            .map((word) => word.trim())
+            .filter((word) => word !== "");
+          if (words.length > 0) {
+            state.words = words;
+            renderApp();
+          } else {
+            document.getElementById("app").innerHTML = `
+              <div class="text-center text-4xl font-extrabold">
+                Word list is empty in word.txt.
+              </div>`;
+          }
+        })
+        .catch((error) => {
+          console.error("Error loading words from word.txt:", error);
+          document.getElementById("app").innerHTML = `
+            <div class="text-center text-4xl font-extrabold">
+              Error loading word list.
+            </div>`;
+        });
+    </script>
+  </body>
+</html>
