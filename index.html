@@ -79,9 +79,10 @@
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
       }
-      /* Tooltip for back button on hover */
+      /* Tooltip for Back button on hover */
       #backBtn {
         position: relative;
+        overflow: visible;
       }
       #backBtn::after {
         content: "Press Tab key instead";
@@ -95,7 +96,7 @@
         border-radius: 0.25rem;
         font-size: 0.875rem;
         opacity: 0;
-        transition: opacity 0.2s ease-in-out;
+        transition: opacity 0.1s ease-in-out;
         pointer-events: none;
         white-space: nowrap;
       }
@@ -154,7 +155,7 @@
         });
       });
 
-      // Global state without a default word list – words will come solely from word.txt.
+      // Global state – words are loaded from word.txt.
       const state = {
         step: 0,
         input: "",
@@ -181,7 +182,7 @@
         }
       }
 
-      // renderApp: Renders the app. If autoFocus is true, focuses the input after rendering.
+      // renderApp: Renders the app and focuses the input if needed.
       function renderApp(autoFocus = false) {
         const app = document.getElementById("app");
         let content = "";
@@ -207,7 +208,7 @@
           // Calculate progress percent
           const progressPercent = (state.step / state.words.length) * 100;
 
-          // Main card: display current word, progress bar, input field, and back button (always visible)
+          // Main card: current word, progress bar, input field, and Back button.
           content += `
             <div id="card" class="w-96 p-6 rounded-xl neumorphic-card text-center z-10 mb-4">
               <div class="progress-container mb-4">
@@ -231,7 +232,7 @@
         }
       }
 
-      // Attach event listeners
+      // Attach event listeners to dynamically rendered elements.
       function attachListeners() {
         // Start button event
         const startBtn = document.getElementById("startBtn");
@@ -253,11 +254,11 @@
         // Input field events
         const textInput = document.getElementById("textInput");
         if (textInput) {
-          // Update state.input on input without re-rendering
+          // Update state.input on input without re-rendering.
           textInput.addEventListener("input", (e) => {
             state.input = e.target.value;
           });
-          // On keydown submission and shortcut for back
+          // On keydown submission and Tab key for back.
           textInput.addEventListener("keydown", (e) => {
             if (e.key === "Enter") {
               const currentWord = state.words[state.step];
@@ -278,7 +279,7 @@
                 safeRender(true);
               }
             } else if (e.key === "Tab") {
-              // Use Tab key as shortcut for Back button
+              // Use Tab key as shortcut for Back action.
               e.preventDefault();
               handleBack();
             }
@@ -286,7 +287,7 @@
         }
       }
 
-      // Function to handle the back action: clear the input so that the user can retype the word
+      // Function to handle Back action: clear the current input.
       function handleBack() {
         state.input = "";
         state.error = false;
@@ -294,7 +295,7 @@
         safeRender(true);
       }
 
-      // Speech synthesis for the word
+      // Speech synthesis for the word.
       function speakWord(word) {
         const synth = window.speechSynthesis;
         const utterance = new SpeechSynthesisUtterance(word);
@@ -303,13 +304,13 @@
         synth.speak(utterance);
       }
 
-      // Play Windows XP error sound
+      // Play Windows XP error sound.
       function playErrorSound() {
         const errorAudio = new Audio("https://www.myinstants.com/media/sounds/windows-xp-error.mp3");
         errorAudio.play();
       }
 
-      // Load the word list from word.txt (located in the root directory)
+      // Load the word list from word.txt (located in the root directory).
       fetch("word.txt")
         .then((response) => {
           if (!response.ok) {
