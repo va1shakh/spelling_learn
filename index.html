@@ -43,7 +43,11 @@
       }
       /* Glossy dark purple input style with transparency, backdrop blur, and a glossy finish */
       .glossy-input {
-        background: linear-gradient(145deg, rgba(45, 3, 59, 0.8), rgba(83, 31, 142, 0.8));
+        background: linear-gradient(
+          145deg,
+          rgba(45, 3, 59, 0.8),
+          rgba(83, 31, 142, 0.8)
+        );
         color: white;
         border: none;
         border-radius: 0.5rem;
@@ -162,24 +166,13 @@
         error: false,
         success: false,
         started: false,
-        words: []
+        words: [],
       };
 
-      // safeRender: Renders the app and focuses the input if needed.
-      // (Simplified without caret preservation to ensure clearing works reliably.)
-      function safeRender(autoFocus = false) {
-        renderApp(autoFocus);
-        if (autoFocus) {
-          const newInput = document.getElementById("textInput");
-          if (newInput) newInput.focus();
-        }
-      }
-
-      // renderApp: Renders the UI.
-      function renderApp(autoFocus = false) {
+      // renderApp: Renders the UI based on current state.
+      function renderApp() {
         const app = document.getElementById("app");
         let content = "";
-
         if (!state.started) {
           // Start screen
           content += `
@@ -191,16 +184,15 @@
             </div>
           `;
         } else if (state.step < state.words.length) {
-          // Determine border color based on state
+          // Determine border color for the input field.
           let inputBorderClass = "border-gray-300";
           if (state.error) {
             inputBorderClass = "border-red-500 animate-pulse";
           } else if (state.success) {
             inputBorderClass = "border-green-500 animate-pulse";
           }
-          // Calculate progress percent
+          // Calculate progress percent.
           const progressPercent = (state.step / state.words.length) * 100;
-
           // Main card: current word, progress bar, input field, and Back button.
           content += `
             <div id="card" class="w-96 p-6 rounded-xl neumorphic-card text-center z-10 mb-4">
@@ -209,25 +201,33 @@
               </div>
               <h2 class="word text-3xl font-semibold mb-4">${state.words[state.step]}</h2>
               <input id="textInput" class="w-full p-4 text-lg rounded-md border-2 transition-colors duration-300 glossy-input ${inputBorderClass}" value="${state.input}" placeholder="Type here...">
-              <button id="backBtn" class="bg-gradient-to-r from-purple-500 to-indigo-500 px-8 py-4 rounded-full text-lg shadow-lg hover:from-purple-600 hover:to-indigo-600 transition mt-4">Back</button>
+              <button id="backBtn" class="bg-gradient-to-r from-purple-500 to-indigo-500 px-8 py-4 rounded-full text-lg shadow-lg hover:from-purple-600 hover:to-indigo-600 transition mt-4">
+                Back
+              </button>
             </div>
           `;
         } else {
           // End screen
           content += `<h2 class="text-4xl font-extrabold z-10">Well done! 🎉</h2>`;
         }
-
         app.innerHTML = content;
         attachListeners();
+      }
+
+      // safeRender: Re-renders and optionally focuses the input.
+      function safeRender(autoFocus = false) {
+        renderApp();
         if (autoFocus) {
-          const inputField = document.getElementById("textInput");
-          if (inputField) inputField.focus();
+          const newInput = document.getElementById("textInput");
+          if (newInput) {
+            newInput.focus();
+          }
         }
       }
 
-      // Attach event listeners to dynamically rendered elements.
+      // attachListeners: Sets up event listeners for dynamic elements.
       function attachListeners() {
-        // Start button event
+        // Start button.
         const startBtn = document.getElementById("startBtn");
         if (startBtn) {
           startBtn.addEventListener("click", () => {
@@ -235,24 +235,21 @@
             safeRender(true);
           });
         }
-
-        // Back button event
+        // Back button.
         const backBtn = document.getElementById("backBtn");
         if (backBtn) {
           backBtn.addEventListener("click", () => {
-            console.log("Back button clicked");
             handleBack();
           });
         }
-
-        // Input field events
+        // Input field.
         const textInput = document.getElementById("textInput");
         if (textInput) {
-          // Update state.input on input without re-rendering.
+          // Update state.input as the user types.
           textInput.addEventListener("input", (e) => {
             state.input = e.target.value;
           });
-          // On keydown submission and Tab key for back.
+          // Handle Enter key for submission and Tab key for back action.
           textInput.addEventListener("keydown", (e) => {
             if (e.key === "Enter") {
               const currentWord = state.words[state.step];
@@ -273,16 +270,15 @@
                 safeRender(true);
               }
             } else if (e.key === "Tab") {
-              // Use Tab key as shortcut for Back action.
+              // Prevent default tabbing behavior and trigger back action.
               e.preventDefault();
-              console.log("Tab key pressed for Back action");
               handleBack();
             }
           });
         }
       }
 
-      // Function to handle Back action: clear the current input.
+      // handleBack: Clears the current input (letting the user retype).
       function handleBack() {
         state.input = "";
         state.error = false;
@@ -290,7 +286,7 @@
         safeRender(true);
       }
 
-      // Speech synthesis for the word.
+      // speakWord: Uses speech synthesis to speak the word.
       function speakWord(word) {
         const synth = window.speechSynthesis;
         const utterance = new SpeechSynthesisUtterance(word);
@@ -299,13 +295,13 @@
         synth.speak(utterance);
       }
 
-      // Play Windows XP error sound.
+      // playErrorSound: Plays an error sound.
       function playErrorSound() {
         const errorAudio = new Audio("https://www.myinstants.com/media/sounds/windows-xp-error.mp3");
         errorAudio.play();
       }
 
-      // Load the word list from word.txt (located in the root directory).
+      // Load the word list from word.txt.
       fetch("word.txt")
         .then((response) => {
           if (!response.ok) {
