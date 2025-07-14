@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spelling Pattern Word Families</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    .highlight {
+      color: #facc15;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-gray-900 to-gray-800 text-white min-h-screen p-6">
+  <div class="max-w-6xl mx-auto">
+    <h1 class="text-4xl font-bold text-center text-yellow-400 mb-10">🧠 Spelling Pattern Word Families</h1>
+
+    <!-- Search Box -->
+    <div class="mb-10">
+      <input type="text" id="search" placeholder="Search words or patterns..." class="w-full p-3 rounded-xl text-black text-lg shadow-md" />
+    </div>
+
+    <div id="wordContainer" class="space-y-10"></div>
+
+    <footer class="mt-16 text-center text-gray-400 text-sm">
+      Made for my friend to learn English spellings 🧡 | Hosted on GitHub Pages
+    </footer>
+  </div>
+
+  <script>
+    const wordFamilies = [
+      {
+        title: '"ea" Words',
+        color: 'text-blue-400',
+        pattern: 'ea',
+        words: [
+          'weak', 'peak', 'leak', 'speak', 'steal', 'meal', 'deal', 'heal', 'seal', 'real', 'neat', 'heat', 'beat', 'seat', 'cheat', 'treat', 'weather', 'feather', 'leather', 'bread', 'head', 'dead', 'lead', 'read', 'break', 'great', 'meant', 'sweat', 'health', 'dream', 'team'
+        ]
+      },
+      {
+        title: '"ight" Words',
+        color: 'text-pink-400',
+        pattern: 'ight',
+        words: [
+          'light', 'night', 'right', 'fight', 'might', 'tight', 'bright', 'sight', 'flight', 'height', 'delight', 'fright', 'knight', 'insight', 'moonlight'
+        ]
+      },
+      {
+        title: '"ough" Words',
+        color: 'text-green-400',
+        pattern: 'ough',
+        words: [
+          'rough', 'tough', 'enough', 'cough', 'though', 'through', 'thought', 'bought', 'brought', 'plough', 'drought', 'thorough', 'sought', 'fought'
+        ]
+      },
+      {
+        title: '"tion" Words',
+        color: 'text-yellow-300',
+        pattern: 'tion',
+        words: [
+          'action', 'station', 'nation', 'vacation', 'location', 'caution', 'motion', 'creation', 'education', 'information', 'emotion', 'relation', 'invitation', 'conversation', 'population', 'revolution', 'application', 'direction', 'situation'
+        ]
+      },
+      {
+        title: '"ph" Words',
+        color: 'text-indigo-300',
+        pattern: 'ph',
+        words: [
+          'phone', 'photo', 'graph', 'paragraph', 'elephant', 'alphabet', 'trophy', 'phase', 'pharmacy', 'dolphin', 'microphone', 'physics', 'philosophy', 'orphans', 'triumph'
+        ]
+      },
+      {
+        title: 'Silent "kn" Words',
+        color: 'text-red-300',
+        pattern: 'kn',
+        words: [
+          'know', 'knee', 'knife', 'knock', 'knot', 'knit', 'kneel', 'knew', 'knowledge', 'knuckle', 'knight'
+        ]
+      },
+      {
+        title: 'Silent "wr" Words',
+        color: 'text-cyan-300',
+        pattern: 'wr',
+        words: [
+          'write', 'wrist', 'wrong', 'wrap', 'wreck', 'wrestle', 'wrench', 'wren', 'wrinkle'
+        ]
+      },
+      {
+        title: '"ould" Words',
+        color: 'text-fuchsia-300',
+        pattern: 'ould',
+        words: [
+          'could', 'would', 'should'
+        ]
+      },
+      {
+        title: '"eak" Words',
+        color: 'text-amber-300',
+        pattern: 'eak',
+        words: [
+          'weak', 'leak', 'speak', 'beak', 'peak', 'sneak', 'freak', 'bleak', 'steak', 'break', 'creak'
+        ]
+      },
+      {
+        title: '"air" Words',
+        color: 'text-rose-300',
+        pattern: 'air',
+        words: [
+          'air', 'hair', 'fair', 'pair', 'chair', 'stair', 'repair', 'flair', 'dairy', 'lair', 'airplane'
+        ]
+      },
+      {
+        title: '"ow" Words',
+        color: 'text-emerald-300',
+        pattern: 'ow',
+        words: [
+          'now', 'how', 'cow', 'brow', 'plow', 'allow', 'snow', 'grow', 'throw', 'blow', 'slow', 'know', 'show', 'below', 'window'
+        ]
+      },
+      {
+        title: '"aw" Words',
+        color: 'text-violet-300',
+        pattern: 'aw',
+        words: [
+          'saw', 'draw', 'paw', 'jaw', 'claw', 'law', 'straw', 'flaw', 'yawn'
+        ]
+      },
+      {
+        title: '"ay" Words',
+        color: 'text-lime-300',
+        pattern: 'ay',
+        words: [
+          'day', 'play', 'say', 'stay', 'tray', 'clay', 'may', 'delay', 'holiday', 'spray', 'gray'
+        ]
+      },
+      {
+        title: '"ee" Words',
+        color: 'text-orange-300',
+        pattern: 'ee',
+        words: [
+          'see', 'tree', 'bee', 'free', 'three', 'knee', 'agree', 'degree', 'flee', 'tee', 'sweet', 'speed', 'green'
+        ]
+      },
+      {
+        title: '"oo" Words',
+        color: 'text-sky-300',
+        pattern: 'oo',
+        words: [
+          'moon', 'spoon', 'noon', 'soon', 'room', 'bloom', 'gloom', 'broom', 'boom', 'school', 'cool', 'pool', 'fool', 'tool'
+        ]
+      }
+    ];
+
+    const wordContainer = document.getElementById('wordContainer');
+
+    function renderWords(filter = '') {
+      wordContainer.innerHTML = '';
+      wordFamilies.forEach(family => {
+        if (filter && !family.pattern.includes(filter.toLowerCase()) && !family.title.toLowerCase().includes(filter.toLowerCase())) return;
+
+        const section = document.createElement('section');
+        section.innerHTML = `
+          <h2 class="text-2xl font-semibold ${family.color} mb-4">${family.title}</h2>
+          <p class="flex flex-wrap gap-3 text-lg">
+            ${family.words.map(w => `<span class="bg-white/10 px-3 py-1 rounded-xl">${w}</span>`).join('')}
+          </p>
+        `;
+        wordContainer.appendChild(section);
+      });
+    }
+
+    document.getElementById('search').addEventListener('input', e => {
+      renderWords(e.target.value);
+    });
+
+    renderWords();
+  </script>
+</body>
+</html>
