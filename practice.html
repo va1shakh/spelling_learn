@@ -153,23 +153,31 @@
 
   let selectedVoice = null;
 
-  function loadVoices() {
-    const voices = speechSynthesis.getVoices();
-    selectedVoice = voices.find(v => v.lang.includes('en-IN') && v.name.toLowerCase().includes('female')) ||
-                    voices.find(v => v.lang.includes('en-IN')) ||
-                    voices.find(v => v.lang.includes('en-GB')) ||
-                    voices[0];
-  }
-
-  speechSynthesis.onvoiceschanged = loadVoices;
-
   function speakWordSlowly(word) {
     const utter = new SpeechSynthesisUtterance(word);
-    utter.voice = selectedVoice;
-    utter.lang = selectedVoice?.lang || 'en-IN';
-    utter.rate = 0.3;
+    utter.rate = 0.5;
     utter.pitch = 1;
-    speechSynthesis.speak(utter);
+    if (selectedVoice) {
+      utter.voice = selectedVoice;
+      utter.lang = selectedVoice.lang;
+    } else {
+      utter.lang = 'en-IN';
+    }
+    window.speechSynthesis.speak(utter);
+  }
+
+  function chooseBestVoice() {
+    const voices = window.speechSynthesis.getVoices();
+    selectedVoice = voices.find(v => v.lang === 'en-IN' && v.name.toLowerCase().includes('female'))
+                  || voices.find(v => v.lang === 'en-IN')
+                  || voices.find(v => v.lang.startsWith('en') && v.name.toLowerCase().includes('female'))
+                  || voices.find(v => v.lang.startsWith('en'));
+  }
+
+  if (typeof speechSynthesis !== "undefined") {
+    speechSynthesis.onvoiceschanged = () => {
+      chooseBestVoice();
+    };
   }
 
   function startWord() {
