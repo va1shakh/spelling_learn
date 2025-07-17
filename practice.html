@@ -142,7 +142,7 @@
 </div>
 
 <script>
-  const words = ["peak", "leak", "meal", "seat", "beat", "treat"];
+  let words = [];
   let current = 0, tries = 0;
   const wrongWords = [];
   const inputBox = document.getElementById("userInput");
@@ -219,7 +219,20 @@
   function initApp() {
     document.getElementById("startOverlay").style.display = "none";
     document.querySelector(".app").style.display = "flex";
-    startWord();
+    loadWords();
+  }
+
+  function loadWords() {
+    fetch('list.txt')
+      .then(res => res.text())
+      .then(data => {
+        words = data.split('\n').map(w => w.trim()).filter(Boolean);
+        startWord();
+      })
+      .catch(err => {
+        alert("Error loading words. Make sure list.txt exists!");
+        console.error(err);
+      });
   }
 
   inputBox.addEventListener("keydown", function (e) {
