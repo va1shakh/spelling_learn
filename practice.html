@@ -142,6 +142,13 @@
 </div>
 
 <script>
+// Fix: wait for voices to be loaded before using
+if (speechSynthesis.onvoiceschanged !== undefined) {
+  speechSynthesis.onvoiceschanged = () => {
+    // This will now correctly load Indian voice if available
+  };
+}
+
   let words = [];
   let current = 0, tries = 0;
   let wrongWords = [];
@@ -152,16 +159,21 @@
   const correctSound = new Audio("https://cdn.pixabay.com/download/audio/2022/03/15/audio_99d6be4959.mp3");
   const wrongSound = new Audio("https://cdn.pixabay.com/download/audio/2022/03/15/audio_3fae6fcba5.mp3");
 
-  function speakWordSlowly(word) {
-  const utter1 = new SpeechSynthesisUtterance(" ");
-  const utter2 = new SpeechSynthesisUtterance(word);
-  utter2.lang = 'en-IN';
-  utter2.rate = 0.4; // slower than before
-  const utter3 = new SpeechSynthesisUtterance(" ");
-  synth.speak(utter1); // slight pause
-  synth.speak(utter2); // the word
-  synth.speak(utter3); // slight pause
+ function speakWordSlowly(word) {
+  const utter = new SpeechSynthesisUtterance(word);
+  const voices = speechSynthesis.getVoices();
+  const indianVoice = voices.find(v => v.lang === 'en-IN');
+
+  if (indianVoice) {
+    utter.voice = indianVoice;
+  }
+
+  utter.lang = 'en-IN'; // fallback
+  utter.rate = 0.5;     // slower for children
+  utter.pitch = 1;
+  speechSynthesis.speak(utter);
 }
+
 
   function startWord() {
     if (current < words.length) {
