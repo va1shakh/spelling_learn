@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Spelling Practice App</title>
-  <script src="https://code.responsivevoice.org/responsivevoice.js"></script>
   <style>
     :root {
       --bg: #1a1a1a;
@@ -152,12 +151,25 @@
   const correctSound = new Audio("https://cdn.pixabay.com/download/audio/2022/03/15/audio_99d6be4959.mp3");
   const wrongSound = new Audio("https://cdn.pixabay.com/download/audio/2022/03/15/audio_3fae6fcba5.mp3");
 
+  let selectedVoice = null;
+
+  function loadVoices() {
+    const voices = speechSynthesis.getVoices();
+    selectedVoice = voices.find(v => v.lang.includes('en-IN') && v.name.toLowerCase().includes('female')) ||
+                    voices.find(v => v.lang.includes('en-IN')) ||
+                    voices.find(v => v.lang.includes('en-GB')) ||
+                    voices[0];
+  }
+
+  speechSynthesis.onvoiceschanged = loadVoices;
+
   function speakWordSlowly(word) {
-    if (responsiveVoice.voiceSupport()) {
-      responsiveVoice.speak(word, "Hindi Female", { rate: 0.3 });
-    } else {
-      alert("Voice not supported in this browser.");
-    }
+    const utter = new SpeechSynthesisUtterance(word);
+    utter.voice = selectedVoice;
+    utter.lang = selectedVoice?.lang || 'en-IN';
+    utter.rate = 0.3;
+    utter.pitch = 1;
+    speechSynthesis.speak(utter);
   }
 
   function startWord() {
