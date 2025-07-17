@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Spelling Practice App</title>
+  <style>
+    :root {
+      --bg: #1a1a1a;
+      --text: #f0f0f0;
+      --accent: #ffd54f;
+      --correct: #00e676;
+      --wrong: #ff5252;
+    }
+    body {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      height: 100vh;
+    }
+    .sidebar {
+      width: 240px;
+      background: #121212;
+      padding: 1rem;
+      border-right: 2px solid #333;
+      overflow-y: auto;
+    }
+    .sidebar h2 {
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+    .sidebar ul {
+      list-style: none;
+      padding-left: 0;
+    }
+    .sidebar li {
+      font-size: 0.9rem;
+      padding: 4px 0;
+      color: var(--accent);
+    }
+    .app {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .main {
+      max-width: 600px;
+      text-align: center;
+    }
+    h1 {
+      font-size: 2.5rem;
+      color: var(--accent);
+      margin-bottom: 1rem;
+    }
+    input[type="text"] {
+      padding: 0.8rem 1rem;
+      font-size: 1.5rem;
+      background: transparent;
+      color: var(--text);
+      border: none;
+      border-bottom: 2px solid #666;
+      outline: none;
+      width: 100%;
+      transition: 0.3s;
+    }
+    input.correct {
+      border-color: var(--correct);
+      box-shadow: 0 0 10px var(--correct);
+    }
+    input.wrong {
+      border-color: var(--wrong);
+      animation: shake 0.3s;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+    button {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      background: #292929;
+      color: var(--text);
+      border: 1px solid #444;
+      font-size: 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #333;
+    }
+    .feedback {
+      margin-top: 1rem;
+      font-size: 2rem;
+      color: var(--wrong);
+      font-weight: bold;
+      opacity: 0;
+      transform: scale(0.5);
+      transition: all 0.5s ease;
+    }
+    .feedback.show {
+      opacity: 1;
+      transform: scale(1.1);
+    }
+    #startOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000000e0;
+      color: var(--accent);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      font-size: 2rem;
+      cursor: pointer;
+      z-index: 1000;
+    }
+  </style>
+  
+</head>
+<body>
+<div id="startOverlay" onclick="initApp()">Click anywhere to start<br><small style="font-size: 1rem;">(Audio will play)</small></div>
+
+<div class="sidebar">
+  <h2>Wrong Words</h2>
+  <ul id="wrongList"></ul>
+</div>
+
+<div class="app">
+  <div class="main">
+    <h1>Spelling Practice</h1>
+    <input type="text" id="userInput" placeholder="Type what you hear..." autocomplete="off" />
+    <button onclick="repeatWord()">🔁 Repeat Word</button>
+    <div class="feedback" id="feedbackBox"></div>
+  </div>
+</div>
+
+<script>
+  let words = [];
+  let current = 0, tries = 0;
+  const wrongWords = [];
+  const inputBox = document.getElementById("userInput");
+  const feedback = document.getElementById("feedbackBox");
+  const wrongList = document.getElementById("wrongList");
+  const correctSound = new Audio("https://cdn.pixabay.com/download/audio/2022/03/15/audio_99d6be4959.mp3");
+  const wrongSound = new Audio("https://cdn.pixabay.com/download/audio/2022/03/15/audio_3fae6fcba5.mp3");
+
+  function speakWordSlowly(word) {
+    responsiveVoice.speak(word, "UK English Female", {rate: 0.6});
+  }
+
+  function startWord() {
+    if (current < words.length) {
+      speakWordSlowly(words[current]);
+      inputBox.value = "";
+      inputBox.classList.remove("correct", "wrong");
+      feedback.classList.remove("show");
+      feedback.innerHTML = "";
+      inputBox.focus();
+    } else {
+      document.querySelector(".main").innerHTML = `
+        <h1>🎉 All Done!</h1>
+        <p>Review your mistakes on the left.</p>`;
+    }
+  }
+
+  function repeatWord() {
+    speakWordSlowly(words[current]);
+    inputBox.focus();
+  }
+
+  function checkAnswer() {
+    const input = inputBox.value.trim().toLowerCase();
+    const correct = words[current];
+    if (input === correct) {
+      inputBox.classList.add("correct");
+      correctSound.play();
+      setTimeout(() => {
+        inputBox.classList.remove("correct");
+        current++;
+        tries = 0;
+        startWord();
+      }, 500);
+    } else {
+      inputBox.classList.add("wrong");
+      wrongSound.play();
+      setTimeout(() => inputBox.classList.remove("wrong"), 400);
+      tries++;
+      if (tries >= 6) {
+        showWrong(correct);
+        setTimeout(() => {
+          current++;
+          tries = 0;
+          startWord();
+        }, 2000);
+      }
+    }
+  }
+
+  function showWrong(correct) {
+    feedback.innerHTML = `❌ <br> Correct: <span style="color:#ff8a65; font-size:2rem;">${correct}</span>`;
+    feedback.classList.add("show");
+    wrongWords.push(correct);
+    const li = document.createElement("li");
+    li.textContent = correct;
+    wrongList.appendChild(li);
+  }
+
+  function initApp() {
+    document.getElementById("startOverlay").style.display = "none";
+    document.querySelector(".app").style.display = "flex";
+    loadWords();
+  }
+
+  function loadWords() {
+    fetch('list.txt')
+      .then(res => res.text())
+      .then(data => {
+        words = data.split('\n').map(w => w.trim()).filter(Boolean);
+        startWord();
+      })
+      .catch(err => {
+        alert("Error loading words. Make sure list.txt exists!");
+        console.error(err);
+      });
+  }
+
+  inputBox.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") checkAnswer();
+  });
+</script>
+</body>
+</html>
