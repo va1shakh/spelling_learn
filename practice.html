@@ -153,11 +153,15 @@
   const wrongSound = new Audio("https://cdn.pixabay.com/download/audio/2022/03/15/audio_3fae6fcba5.mp3");
 
   function speakWordSlowly(word) {
-    const utter = new SpeechSynthesisUtterance(word);
-    utter.lang = 'en-IN';
-    utter.rate = 0.6;
-    synth.speak(utter);
-  }
+  const utter1 = new SpeechSynthesisUtterance(" ");
+  const utter2 = new SpeechSynthesisUtterance(word);
+  utter2.lang = 'en-IN';
+  utter2.rate = 0.4; // slower than before
+  const utter3 = new SpeechSynthesisUtterance(" ");
+  synth.speak(utter1); // slight pause
+  synth.speak(utter2); // the word
+  synth.speak(utter3); // slight pause
+}
 
   function startWord() {
     if (current < words.length) {
