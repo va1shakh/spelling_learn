@@ -123,6 +123,7 @@
       z-index: 1000;
     }
   </style>
+  <script src="https://code.responsivevoice.org/responsivevoice.js?key=8NWhwN2j"></script>
 </head>
 <body>
 <div id="startOverlay" onclick="initApp()">Click anywhere to start<br><small style="font-size: 1rem;">(Audio will play)</small></div>
@@ -151,33 +152,8 @@
   const correctSound = new Audio("https://cdn.pixabay.com/download/audio/2022/03/15/audio_99d6be4959.mp3");
   const wrongSound = new Audio("https://cdn.pixabay.com/download/audio/2022/03/15/audio_3fae6fcba5.mp3");
 
-  let selectedVoice = null;
-
   function speakWordSlowly(word) {
-    const utter = new SpeechSynthesisUtterance(word);
-    utter.rate = 0.5;
-    utter.pitch = 1;
-    if (selectedVoice) {
-      utter.voice = selectedVoice;
-      utter.lang = selectedVoice.lang;
-    } else {
-      utter.lang = 'en-IN';
-    }
-    window.speechSynthesis.speak(utter);
-  }
-
-  function chooseBestVoice() {
-    const voices = window.speechSynthesis.getVoices();
-    selectedVoice = voices.find(v => v.lang === 'en-IN' && v.name.toLowerCase().includes('female'))
-                  || voices.find(v => v.lang === 'en-IN')
-                  || voices.find(v => v.lang.startsWith('en') && v.name.toLowerCase().includes('female'))
-                  || voices.find(v => v.lang.startsWith('en'));
-  }
-
-  if (typeof speechSynthesis !== "undefined") {
-    speechSynthesis.onvoiceschanged = () => {
-      chooseBestVoice();
-    };
+    responsiveVoice.speak(word, "UK English Female", {rate: 0.6});
   }
 
   function startWord() {
