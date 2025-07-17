@@ -123,21 +123,23 @@
       z-index: 1000;
     }
   </style>
-  
 </head>
 <body>
-<div id="startOverlay" onclick="initApp()">Click anywhere to start<br><small style="font-size: 1rem;"></small></div>
+<div id="startOverlay" onclick="initApp()">Click anywhere to start<br><small style="font-size: 1rem;">(Audio will play)</small></div>
 
 <div class="sidebar">
   <h2>Wrong Words</h2>
   <ul id="wrongList"></ul>
 </div>
+
 <script src="https://code.responsivevoice.org/responsivevoice.js?key=g8OSZpDd"></script>
+
 <div class="app">
   <div class="main">
     <h1>Spelling Practice</h1>
     <input type="text" id="userInput" placeholder="Type what you hear..." autocomplete="off" />
     <button onclick="repeatWord()">🔁 Repeat Word</button>
+    <button onclick="resetProgress()">🧹 Reset Progress</button>
     <div class="feedback" id="feedbackBox"></div>
   </div>
 </div>
@@ -145,7 +147,7 @@
 <script>
   let words = [];
   let current = 0, tries = 0;
-  const wrongWords = [];
+  let wrongWords = [];
   const inputBox = document.getElementById("userInput");
   const feedback = document.getElementById("feedbackBox");
   const wrongList = document.getElementById("wrongList");
@@ -153,7 +155,7 @@
   const wrongSound = new Audio("https://cdn.pixabay.com/download/audio/2022/03/15/audio_3fae6fcba5.mp3");
 
   function speakWordSlowly(word) {
-    responsiveVoice.speak(word, "Hindi Male");
+    responsiveVoice.speak(word, "Indian English Female");
   }
 
   function startWord() {
@@ -186,6 +188,7 @@
         inputBox.classList.remove("correct");
         current++;
         tries = 0;
+        saveProgress();
         startWord();
       }, 500);
     } else {
@@ -198,6 +201,7 @@
         setTimeout(() => {
           current++;
           tries = 0;
+          saveProgress();
           startWord();
         }, 2000);
       }
@@ -213,6 +217,32 @@
     wrongList.appendChild(li);
   }
 
+  function saveProgress() {
+    localStorage.setItem("spelling_current", current);
+    localStorage.setItem("spelling_wrong", JSON.stringify(wrongWords));
+  }
+
+  function loadProgress() {
+    const savedIndex = parseInt(localStorage.getItem("spelling_current"));
+    const savedWrong = JSON.parse(localStorage.getItem("spelling_wrong") || "[]");
+
+    if (!isNaN(savedIndex)) current = savedIndex;
+    if (Array.isArray(savedWrong)) {
+      wrongWords = savedWrong;
+      wrongWords.forEach(word => {
+        const li = document.createElement("li");
+        li.textContent = word;
+        wrongList.appendChild(li);
+      });
+    }
+  }
+
+  function resetProgress() {
+    localStorage.removeItem("spelling_current");
+    localStorage.removeItem("spelling_wrong");
+    location.reload();
+  }
+
   function initApp() {
     document.getElementById("startOverlay").style.display = "none";
     document.querySelector(".app").style.display = "flex";
@@ -224,6 +254,7 @@
       .then(res => res.text())
       .then(data => {
         words = data.split('\n').map(w => w.trim()).filter(Boolean);
+        loadProgress();
         startWord();
       })
       .catch(err => {
