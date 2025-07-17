@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Spelling Practice App</title>
+  <script src="https://code.responsivevoice.org/responsivevoice.js"></script>
   <style>
     :root {
       --bg: #1a1a1a;
@@ -125,7 +126,7 @@
   </style>
 </head>
 <body>
-<div id="startOverlay" onclick="initApp()">Click anywhere to start<br><small style="font-size: 1rem;"></small></div>
+<div id="startOverlay" onclick="initApp()">Click anywhere to start<br><small style="font-size: 1rem;">(Audio will play)</small></div>
 
 <div class="sidebar">
   <h2>Wrong Words</h2>
@@ -142,38 +143,22 @@
 </div>
 
 <script>
-// Fix: wait for voices to be loaded before using
-if (speechSynthesis.onvoiceschanged !== undefined) {
-  speechSynthesis.onvoiceschanged = () => {
-    // This will now correctly load Indian voice if available
-  };
-}
-
   let words = [];
   let current = 0, tries = 0;
-  let wrongWords = [];
+  const wrongWords = [];
   const inputBox = document.getElementById("userInput");
   const feedback = document.getElementById("feedbackBox");
   const wrongList = document.getElementById("wrongList");
-  const synth = window.speechSynthesis;
   const correctSound = new Audio("https://cdn.pixabay.com/download/audio/2022/03/15/audio_99d6be4959.mp3");
   const wrongSound = new Audio("https://cdn.pixabay.com/download/audio/2022/03/15/audio_3fae6fcba5.mp3");
 
- function speakWordSlowly(word) {
-  const utter = new SpeechSynthesisUtterance(word);
-  const voices = speechSynthesis.getVoices();
-  const indianVoice = voices.find(v => v.lang === 'en-IN');
-
-  if (indianVoice) {
-    utter.voice = indianVoice;
+  function speakWordSlowly(word) {
+    if (responsiveVoice.voiceSupport()) {
+      responsiveVoice.speak(word, "Hindi Female", { rate: 0.3 });
+    } else {
+      alert("Voice not supported in this browser.");
+    }
   }
-
-  utter.lang = 'en-IN'; // fallback
-  utter.rate = 0.5;     // slower for children
-  utter.pitch = 1;
-  speechSynthesis.speak(utter);
-}
-
 
   function startWord() {
     if (current < words.length) {
@@ -205,7 +190,6 @@ if (speechSynthesis.onvoiceschanged !== undefined) {
         inputBox.classList.remove("correct");
         current++;
         tries = 0;
-        saveProgress();
         startWord();
       }, 500);
     } else {
@@ -218,7 +202,6 @@ if (speechSynthesis.onvoiceschanged !== undefined) {
         setTimeout(() => {
           current++;
           tries = 0;
-          saveProgress();
           startWord();
         }, 2000);
       }
@@ -228,10 +211,7 @@ if (speechSynthesis.onvoiceschanged !== undefined) {
   function showWrong(correct) {
     feedback.innerHTML = `❌ <br> Correct: <span style="color:#ff8a65; font-size:2rem;">${correct}</span>`;
     feedback.classList.add("show");
-    if (!wrongWords.includes(correct)) {
-      wrongWords.push(correct);
-      saveProgress();
-    }
+    wrongWords.push(correct);
     const li = document.createElement("li");
     li.textContent = correct;
     wrongList.appendChild(li);
@@ -243,32 +223,11 @@ if (speechSynthesis.onvoiceschanged !== undefined) {
     loadWords();
   }
 
-  function saveProgress() {
-    localStorage.setItem("spelling_current", current);
-    localStorage.setItem("spelling_wrongWords", JSON.stringify(wrongWords));
-  }
-
-  function loadProgress() {
-    const savedCurrent = localStorage.getItem("spelling_current");
-    const savedWrong = localStorage.getItem("spelling_wrongWords");
-
-    if (savedCurrent !== null) current = parseInt(savedCurrent);
-    if (savedWrong !== null) {
-      wrongWords = JSON.parse(savedWrong);
-      wrongWords.forEach(word => {
-        const li = document.createElement("li");
-        li.textContent = word;
-        wrongList.appendChild(li);
-      });
-    }
-  }
-
   function loadWords() {
     fetch('list.txt')
       .then(res => res.text())
       .then(data => {
         words = data.split('\n').map(w => w.trim()).filter(Boolean);
-        loadProgress();
         startWord();
       })
       .catch(err => {
