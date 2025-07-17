@@ -134,7 +134,7 @@
 
 <script src="https://code.responsivevoice.org/responsivevoice.js?key=g8OSZpDd"></script>
 
-<div class="app">
+<div class="app" style="display: none;">
   <div class="main">
     <h1>Spelling Practice</h1>
     <input type="text" id="userInput" placeholder="Type what you hear..." autocomplete="off" />
@@ -155,7 +155,26 @@
   const wrongSound = new Audio("https://cdn.pixabay.com/download/audio/2022/03/15/audio_3fae6fcba5.mp3");
 
   function speakWordSlowly(word) {
-    responsiveVoice.speak(word, "Indian English Female");
+    responsiveVoice.speak(word, "Hindi Male");
+  }
+
+  function saveProgress() {
+    localStorage.setItem("spelling_current", current);
+    localStorage.setItem("spelling_wrong", JSON.stringify(wrongWords));
+  }
+
+  function loadProgress() {
+    const savedCurrent = parseInt(localStorage.getItem("spelling_current"));
+    const savedWrong = JSON.parse(localStorage.getItem("spelling_wrong") || "[]");
+
+    if (!isNaN(savedCurrent)) current = savedCurrent;
+    wrongWords = savedWrong || [];
+
+    wrongWords.forEach(word => {
+      const li = document.createElement("li");
+      li.textContent = word;
+      wrongList.appendChild(li);
+    });
   }
 
   function startWord() {
@@ -211,29 +230,11 @@
   function showWrong(correct) {
     feedback.innerHTML = `❌ <br> Correct: <span style="color:#ff8a65; font-size:2rem;">${correct}</span>`;
     feedback.classList.add("show");
-    wrongWords.push(correct);
-    const li = document.createElement("li");
-    li.textContent = correct;
-    wrongList.appendChild(li);
-  }
-
-  function saveProgress() {
-    localStorage.setItem("spelling_current", current);
-    localStorage.setItem("spelling_wrong", JSON.stringify(wrongWords));
-  }
-
-  function loadProgress() {
-    const savedIndex = parseInt(localStorage.getItem("spelling_current"));
-    const savedWrong = JSON.parse(localStorage.getItem("spelling_wrong") || "[]");
-
-    if (!isNaN(savedIndex)) current = savedIndex;
-    if (Array.isArray(savedWrong)) {
-      wrongWords = savedWrong;
-      wrongWords.forEach(word => {
-        const li = document.createElement("li");
-        li.textContent = word;
-        wrongList.appendChild(li);
-      });
+    if (!wrongWords.includes(correct)) {
+      wrongWords.push(correct);
+      const li = document.createElement("li");
+      li.textContent = correct;
+      wrongList.appendChild(li);
     }
   }
 
@@ -246,19 +247,15 @@
   function initApp() {
     document.getElementById("startOverlay").style.display = "none";
     document.querySelector(".app").style.display = "flex";
-    loadWords();
-  }
-
-  function loadWords() {
     fetch('list.txt')
       .then(res => res.text())
       .then(data => {
         words = data.split('\n').map(w => w.trim()).filter(Boolean);
-        loadProgress();
+        loadProgress(); // ✅ Load BEFORE starting
         startWord();
       })
       .catch(err => {
-        alert("Error loading words. Make sure list.txt exists!");
+        alert("Could not load word list.");
         console.error(err);
       });
   }
