@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>English Learning Playlists</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #00c853;
+      --primary-light: #69f0ae;
+      --background: #f1fdf6;
+      --card-bg: rgba(255, 255, 255, 0.15);
+      --text: #0f3d2e;
+      --radius: 1.5rem;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(145deg, #f1fdf6, #e0f7ea);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    header {
+      padding: 3rem 1rem;
+      text-align: center;
+      background: linear-gradient(to right, var(--primary), var(--primary-light));
+      color: white;
+      box-shadow: 0 8px 20px rgba(0, 200, 83, 0.2);
+    }
+
+    header h1 {
+      font-size: 3rem;
+      font-weight: 800;
+      background: linear-gradient(to right, #ffffff, #ccff90);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: fadeInDown 1s ease-out;
+    }
+
+    header p {
+      margin-top: 0.5rem;
+      font-size: 1.2rem;
+      opacity: 0.9;
+    }
+
+    main {
+      padding: 4rem 2rem;
+      max-width: 1200px;
+      margin: auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      animation: fadeInUp 1s ease;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .card:hover {
+      transform: translateY(-10px) scale(1.02);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    iframe {
+      width: 100%;
+      height: 200px;
+      border: none;
+    }
+
+    .card-content {
+      padding: 1.5rem;
+    }
+
+    .card-content h2 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .card-content p {
+      font-size: 0.95rem;
+      color: #33691e;
+    }
+
+    footer {
+      padding: 2rem;
+      text-align: center;
+      background: #e8f5e9;
+      color: #333;
+      font-size: 0.9rem;
+    }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>English Learning Playlists</h1>
+    <p>Learn and grow your English skills with curated YouTube playlists</p>
+  </header>
+
+  <main>
+    <div class="card">
+      <iframe src="https://www.youtube.com/watch?v=ihzJrrxl9ko&list=PLLhpoXRnz50rgsegEmn0ndDtCcBwG0LUh" allowfullscreen></iframe>
+      <div class="card-content">
+        <h2>Everyday English with Sonia</h2>
+        <p>27 Videos</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <iframe src="https://www.youtube.com/watch?v=6jg0F0fecho&list=PLNdmPgrEj6aZxbf_tnB-24J8c0TfHODar" allowfullscreen></iframe>
+      <div class="card-content">
+        <h2>Easy English with Vini</h2>
+        <p>16 Videos</p>
+      </div>
+    </div>
+
+  <div class="card">
+      <iframe src="https://www.youtube.com/watch?v=CAZOmF2HoK4&list=PLwLR2IysP2jVIIEPIXtQkoeOyjhyg7gRE&pp=gAQB" allowfullscreen></iframe>
+      <div class="card-content">
+        <h2>Justin Thomas English</h2>
+        <p>Must Watch</p>
+      </div>
+    </div>
+
+    <!-- Add more cards as needed -->
+  </main>
+
+</body>
+</html>
