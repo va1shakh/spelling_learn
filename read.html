@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simple English Stories</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Fira Code', monospace;
+      background: linear-gradient(to bottom, #f2f3f7, #e3e6ee);
+      color: #2c2c2c;
+      min-height: 100vh;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 2rem;
+      color: #1a1a1a;
+      animation: fadeIn 1s ease-out;
+    }
+    .story-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      width: 100%;
+      max-width: 1000px;
+    }
+    .story-card {
+      background: #ffffffee;
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      cursor: pointer;
+      animation: fadeUp 0.6s ease-in;
+    }
+    .story-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    }
+    .read-btn {
+      margin-top: 1rem;
+      background: #4f46e5;
+      color: white;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .read-btn:hover {
+      background: #3730a3;
+    }
+    .canvas {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: #ffffff;
+      color: #1a1a1a;
+      padding: 3rem;
+      overflow-y: scroll;
+      z-index: 10;
+      line-height: 1.8;
+      font-size: 1.1rem;
+      animation: fadeIn 0.5s ease;
+    }
+    .close-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #ff4d4d;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <h1>📖 Simple English Stories</h1>
+  <div class="story-list" id="storyList"></div>
+
+  <div class="canvas" id="canvas">
+    <button class="close-btn" onclick="closeCanvas()">Close</button>
+    <div id="storyContent"></div>
+  </div>
+
+  <script>
+    const stories = [
+      {
+        title: "The Clever Fox 🦊",
+        content: `Once upon a time, in a dense forest, there lived a clever fox. The forest was full of animals—rabbits, deer, birds, and even a lazy bear. But the fox was known for being smart. Every day, the fox would walk through the forest looking for food. One day, he saw a crow sitting on a branch with a piece of cheese in her beak. The fox thought, "That cheese looks tasty. I must have it."
+
+He sat under the tree and said, "Dear crow, your feathers are so shiny! You must be the most beautiful bird in this forest. But I wonder, can you sing as beautifully as you look?" The crow, happy with the compliment, opened her beak to sing. The cheese fell, and the fox quickly grabbed it. "Thank you, dear crow," said the fox with a smile, and he walked away.
+
+From that day, the crow learned a lesson: don’t be proud, and always be careful with praise. The fox enjoyed the cheese and continued his clever tricks. But he also knew one thing—using your brain is sometimes better than using your strength. The other animals watched and learned. The forest remained peaceful, and the fox became a little wiser every day.
+
+The end.`
+      },
+        {
+  title: "Tom's New Friend 🐶",
+  content: `
+Tom was a little boy who lived in a small village. He did not have any brothers or sisters, so sometimes he felt lonely. One sunny morning, Tom walked to the big green field near his house. He liked to watch the birds and flowers there. Suddenly, he saw a small puppy. The puppy looked lost and hungry. Its fur was dirty, and it was shaking from the cold.
+
+Tom felt sorry for the puppy. He took some bread from his pocket and gave it to the puppy. The puppy ate quickly and wagged its tail. Tom smiled and said, "Don’t worry, little puppy. I will help you." The puppy followed Tom all the way to his home. Tom’s mother saw the puppy and said, "We can keep it for one night, but if nobody comes to find it, you can keep it."
+
+The next morning, the puppy was still there. Tom was very happy. He decided to name the puppy Max. Every day after school, Tom played with Max in the garden. Max was full of energy. He ran and jumped happily. Tom taught Max simple tricks. First, Max learned to sit. Then, he learned to roll on the ground. Max liked to listen and always tried to please Tom.
+
+The villagers saw Tom and Max together. They smiled and said, "Tom looks happier now." Tom was no longer lonely. Max was his best friend. One day, a big storm came. The wind was strong, and the rain was heavy. Tom and Max stayed inside the house. Tom hugged Max and said, "I am glad you are with me." Max wagged his tail happily.
+
+From that day, Tom and Max shared many adventures. They went to the river, climbed trees, and watched stars at night. Tom learned how to take care of Max, and Max gave Tom love and friendship. Tom knew that having a friend was the best thing in the world.
+
+The end.
+`
+},
+        {
+  title: "The Brave Little Ant 🐜",
+  content: `
+In a big garden full of flowers and tall grass, there lived a small ant named Annie. Annie was very small but she had a big heart. Every day, Annie and her ant friends went out to find food. The garden was full of many dangers like big birds and rain, but Annie was brave.
+
+One sunny morning, Annie saw a big crumb on the ground. It was the biggest piece of food she had ever seen. Annie wanted to bring the crumb back to her home to share with her family and friends. But the crumb was very heavy, and Annie could not carry it alone.
+
+Annie asked her friends for help. They all tried to pull the crumb together. It was difficult, but they worked as a team. Slowly, they moved the crumb toward their anthill. On the way, a big bird saw them and wanted to eat the ants. Annie quickly told her friends to hide behind a leaf. The bird flew away, and the ants were safe.
+
+The ants continued their journey. Suddenly, dark clouds came, and rain started to fall. The ants had to find shelter fast. Annie led the group to a small hole under a tree where they stayed dry. After the rain stopped, they went back to carrying the crumb.
+
+Finally, after a long day of hard work, Annie and her friends brought the crumb home. All the ants were happy and thanked Annie for her bravery and leadership. They shared the food and had a big feast.
+
+Annie learned that no matter how small you are, you can do great things if you are brave and work together with your friends. She felt proud and happy.
+
+The end.
+`
+},
+        {
+  title: "Lily's Garden 🌸",
+  content: `
+Lily was a little girl who loved flowers. She had a small garden behind her house. Every morning, Lily went to the garden with a watering can. She watered the plants and talked to them softly. She believed the flowers liked to hear kind words.
+
+One day, Lily found some seeds in a small bag. Her mother told her they were flower seeds. Lily was excited to plant them. She dug small holes in the soil and put the seeds inside. Then, she covered them with dirt and watered the ground.
+
+Days passed, and Lily checked her garden every day. At first, nothing grew. Lily felt a little sad but kept watering and caring for the seeds. After one week, tiny green leaves started to appear. Lily was very happy.
+
+As weeks went by, the plants grew taller. Beautiful flowers bloomed in many colors—red, yellow, pink, and blue. Butterflies and bees came to visit the garden. Lily felt proud of her hard work.
+
+Her friends came to see the garden and smiled at the flowers. They said, “Lily, your garden is so pretty!” Lily smiled and said, “I love to take care of my flowers. They make me happy.”
+
+One sunny afternoon, Lily sat in her garden and read a book. The soft breeze moved the flowers gently. Lily felt calm and peaceful. She knew that patience and care can make wonderful things grow.
+
+The end.
+`
+},
+        {
+  title: "The Lost Balloon 🎈",
+  content: `
+One sunny afternoon, a little boy named Jack had a bright red balloon. He loved his balloon very much. Jack walked to the park with the balloon in his hand. He played with his friends and ran around happily.
+
+Suddenly, a strong wind blew. The balloon slipped from Jack’s hand and flew high into the sky. Jack looked up and saw the balloon flying away. He felt sad but decided to follow it.
+
+Jack ran after the balloon as it floated over trees and houses. The balloon flew over the river and into a big forest. Jack was brave and did not stop. He wanted his balloon back.
+
+In the forest, Jack saw animals and birds. A kind squirrel showed him the way. The balloon got stuck on a tall tree branch. Jack tried to climb the tree but it was very high.
+
+Jack thought hard and found a long stick on the ground. He used the stick to carefully push the balloon down. Slowly, the balloon came loose and fell into Jack’s hands.
+
+Jack was very happy. He thanked the squirrel and walked back home. When he reached the park, his friends cheered. Jack learned to hold the balloon tightly and be careful.
+
+From that day, Jack enjoyed his balloon even more. He knew that sometimes, things can be lost, but if you are brave and patient, you can find them again.
+
+The end.
+`
+},
+        {
+  title: "Max and the Rainbow 🌈",
+  content: `
+Max was a happy boy who loved to play outside. One day, after a soft rain, Max saw a big, bright rainbow in the sky. The colors were red, orange, yellow, green, blue, and purple. Max was very excited.
+
+He remembered a story about a pot of gold at the end of the rainbow. Max wanted to find it. He ran outside and followed the rainbow’s colors. He walked through the fields, over the hills, and near the river.
+
+Along the way, Max met his friend Mia. She asked, “Where are you going, Max?” Max said, “I am looking for the pot of gold at the end of the rainbow.” Mia smiled and said, “That sounds fun! I will come with you.”
+
+Together, Max and Mia walked and laughed. They saw flowers and butterflies. They climbed rocks and crossed little streams. The rainbow seemed to move as they walked.
+
+After a long time, they reached a big tree. The rainbow ended there, but there was no pot of gold. Max felt a little sad. Mia said, “Look around! We found beautiful things like flowers and fun adventures. That is the real treasure.”
+
+Max smiled and said, “You are right. The journey was better than the gold.” They sat under the tree and watched the colors slowly fade away.
+
+From that day, Max learned to enjoy the little things. He knew that happiness comes from friends, nature, and fun, not from gold or treasure.
+
+The end.
+`
+}
+
+
+      // Add 19 more stories here in the same format
+    ];
+
+    const storyList = document.getElementById("storyList");
+    const storyContent = document.getElementById("storyContent");
+    const canvas = document.getElementById("canvas");
+
+    function showStory(index) {
+      const story = stories[index];
+      storyContent.innerHTML = `<h2>${story.title}</h2><p>${story.content}</p>`;
+      canvas.style.display = "block";
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function closeCanvas() {
+      canvas.style.display = "none";
+    }
+
+    function loadStories() {
+      stories.forEach((story, i) => {
+        const card = document.createElement("div");
+        card.className = "story-card";
+        card.innerHTML = `<h3>${story.title}</h3><button class='read-btn' onclick='showStory(${i})'>Read</button>`;
+        storyList.appendChild(card);
+      });
+    }
+
+    loadStories();
+  </script>
+</body>
+</html>
