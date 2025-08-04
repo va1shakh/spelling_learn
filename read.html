@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Simple English Stories</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Simple English Stories - Dark Mode</title>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code&display=swap" rel="stylesheet" />
   <style>
     * {
@@ -13,8 +13,11 @@
     }
     body {
       font-family: 'Fira Code', monospace;
-      background: linear-gradient(to bottom, #f2f3f7, #e3e6ee);
-      color: #2c2c2c;
+      /* Animated soft gradient dark background */
+      background: linear-gradient(270deg, #121212, #1e1e1e, #121212);
+      background-size: 600% 600%;
+      animation: gradientShift 30s ease infinite;
+      color: #e0e0e0;
       min-height: 100vh;
       padding: 2rem;
       display: flex;
@@ -22,10 +25,15 @@
       align-items: center;
       justify-content: flex-start;
     }
+    @keyframes gradientShift {
+      0% {background-position:0% 50%;}
+      50% {background-position:100% 50%;}
+      100% {background-position:0% 50%;}
+    }
     h1 {
       font-size: 2.5rem;
       margin-bottom: 2rem;
-      color: #1a1a1a;
+      color: #ddd;
       animation: fadeIn 1s ease-out;
     }
     .story-list {
@@ -36,30 +44,40 @@
       max-width: 1000px;
     }
     .story-card {
-      background: #ffffffee;
+      background: #1e1e1e;
       border-radius: 16px;
       padding: 1.5rem;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      box-shadow: 0 10px 25px rgba(255,255,255,0.1);
       transition: transform 0.3s ease, box-shadow 0.3s ease;
       cursor: pointer;
       animation: fadeUp 0.6s ease-in;
+      color: #ddd;
     }
     .story-card:hover {
       transform: translateY(-6px);
-      box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+      box-shadow: 0 15px 30px rgba(255,255,255,0.2);
+    }
+    /* Glow effect on story title on hover */
+    .story-card h3 {
+      transition: text-shadow 0.3s ease;
+      color: #ccc;
+    }
+    .story-card:hover h3 {
+      text-shadow: 0 0 8px #7c3aed;
     }
     .read-btn {
       margin-top: 1rem;
-      background: #4f46e5;
+      background: #7c3aed;
       color: white;
       border: none;
       padding: 0.6rem 1.2rem;
       border-radius: 8px;
       cursor: pointer;
       transition: background 0.3s;
+      font-weight: 600;
     }
     .read-btn:hover {
-      background: #3730a3;
+      background: #5b21b6;
     }
     .canvas {
       display: none;
@@ -68,26 +86,55 @@
       left: 0;
       width: 100vw;
       height: 100vh;
-      background-color: #ffffff;
-      color: #1a1a1a;
-      padding: 3rem;
+      background-color: #121212;
+      color: #ddd;
+      padding: 3rem 3rem 2rem;
       overflow-y: scroll;
       z-index: 10;
       line-height: 1.8;
       font-size: 1.1rem;
       animation: fadeIn 0.5s ease;
+      user-select: text;
+    }
+    /* Custom scrollbar for canvas */
+    .canvas::-webkit-scrollbar {
+      width: 8px;
+    }
+    .canvas::-webkit-scrollbar-track {
+      background: #1e1e1e;
+    }
+    .canvas::-webkit-scrollbar-thumb {
+      background-color: #7c3aed;
+      border-radius: 4px;
     }
     .close-btn {
       position: fixed;
       top: 20px;
       right: 20px;
-      background: #ff4d4d;
+      background: #bb0000;
       color: white;
       border: none;
       padding: 0.5rem 1rem;
       border-radius: 8px;
       cursor: pointer;
       font-size: 1rem;
+      z-index: 15;
+      font-weight: 600;
+      transition: background 0.3s;
+    }
+    .close-btn:hover {
+      background: #dd3333;
+    }
+    /* Reading progress bar */
+    #progressBar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 4px;
+      background-color: #7c3aed;
+      width: 0%;
+      transition: width 0.2s;
+      z-index: 20;
     }
     @keyframes fadeIn {
       from { opacity: 0; }
@@ -104,6 +151,7 @@
   <div class="story-list" id="storyList"></div>
 
   <div class="canvas" id="canvas">
+    <div id="progressBar"></div>
     <button class="close-btn" onclick="closeCanvas()">Close</button>
     <div id="storyContent"></div>
   </div>
@@ -120,9 +168,9 @@ From that day, the crow learned a lesson: don’t be proud, and always be carefu
 
 The end.`
       },
-        {
-  title: "Tom's New Friend 🐶",
-  content: `
+      {
+        title: "Tom's New Friend 🐶",
+        content: `
 Tom was a little boy who lived in a small village. He did not have any brothers or sisters, so sometimes he felt lonely. One sunny morning, Tom walked to the big green field near his house. He liked to watch the birds and flowers there. Suddenly, he saw a small puppy. The puppy looked lost and hungry. Its fur was dirty, and it was shaking from the cold.
 
 Tom felt sorry for the puppy. He took some bread from his pocket and gave it to the puppy. The puppy ate quickly and wagged its tail. Tom smiled and said, "Don’t worry, little puppy. I will help you." The puppy followed Tom all the way to his home. Tom’s mother saw the puppy and said, "We can keep it for one night, but if nobody comes to find it, you can keep it."
@@ -135,10 +183,10 @@ From that day, Tom and Max shared many adventures. They went to the river, climb
 
 The end.
 `
-},
-        {
-  title: "The Brave Little Ant 🐜",
-  content: `
+      },
+      {
+        title: "The Brave Little Ant 🐜",
+        content: `
 In a big garden full of flowers and tall grass, there lived a small ant named Annie. Annie was very small but she had a big heart. Every day, Annie and her ant friends went out to find food. The garden was full of many dangers like big birds and rain, but Annie was brave.
 
 One sunny morning, Annie saw a big crumb on the ground. It was the biggest piece of food she had ever seen. Annie wanted to bring the crumb back to her home to share with her family and friends. But the crumb was very heavy, and Annie could not carry it alone.
@@ -153,10 +201,10 @@ Annie learned that no matter how small you are, you can do great things if you a
 
 The end.
 `
-},
-        {
-  title: "Lily's Garden 🌸",
-  content: `
+      },
+      {
+        title: "Lily's Garden 🌸",
+        content: `
 Lily was a little girl who loved flowers. She had a small garden behind her house. Every morning, Lily went to the garden with a watering can. She watered the plants and talked to them softly. She believed the flowers liked to hear kind words.
 
 One day, Lily found some seeds in a small bag. Her mother told her they were flower seeds. Lily was excited to plant them. She dug small holes in the soil and put the seeds inside. Then, she covered them with dirt and watered the ground.
@@ -171,10 +219,10 @@ One sunny afternoon, Lily sat in her garden and read a book. The soft breeze mov
 
 The end.
 `
-},
-        {
-  title: "The Lost Balloon 🎈",
-  content: `
+      },
+      {
+        title: "The Lost Balloon 🎈",
+        content: `
 One sunny afternoon, a little boy named Jack had a bright red balloon. He loved his balloon very much. Jack walked to the park with the balloon in his hand. He played with his friends and ran around happily.
 
 Suddenly, a strong wind blew. The balloon slipped from Jack’s hand and flew high into the sky. Jack looked up and saw the balloon flying away. He felt sad but decided to follow it.
@@ -191,10 +239,10 @@ From that day, Jack enjoyed his balloon even more. He knew that sometimes, thing
 
 The end.
 `
-},
-        {
-  title: "Max and the Rainbow 🌈",
-  content: `
+      },
+      {
+        title: "Max and the Rainbow 🌈",
+        content: `
 Max was a happy boy who loved to play outside. One day, after a soft rain, Max saw a big, bright rainbow in the sky. The colors were red, orange, yellow, green, blue, and purple. Max was very excited.
 
 He remembered a story about a pot of gold at the end of the rainbow. Max wanted to find it. He ran outside and followed the rainbow’s colors. He walked through the fields, over the hills, and near the river.
@@ -211,26 +259,34 @@ From that day, Max learned to enjoy the little things. He knew that happiness co
 
 The end.
 `
-}
-
-
-      // Add 19 more stories here in the same format
+      }
     ];
 
     const storyList = document.getElementById("storyList");
     const storyContent = document.getElementById("storyContent");
     const canvas = document.getElementById("canvas");
+    const progressBar = document.getElementById("progressBar");
 
     function showStory(index) {
       const story = stories[index];
-      storyContent.innerHTML = `<h2>${story.title}</h2><p>${story.content}</p>`;
+      storyContent.innerHTML = `<h2>${story.title}</h2><p>${story.content.replace(/\n/g, '<br><br>')}</p>`;
       canvas.style.display = "block";
+      canvas.scrollTop = 0; // reset scroll
+      progressBar.style.width = "0%";
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function closeCanvas() {
       canvas.style.display = "none";
     }
+
+    // Update progress bar on scroll
+    canvas.addEventListener('scroll', () => {
+      const scrollTop = canvas.scrollTop;
+      const scrollHeight = canvas.scrollHeight - canvas.clientHeight;
+      const scrollPercent = (scrollTop / scrollHeight) * 100;
+      progressBar.style.width = scrollPercent + '%';
+    });
 
     function loadStories() {
       stories.forEach((story, i) => {
